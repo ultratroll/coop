@@ -42,5 +42,7 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &ACoopCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACoopCharacter::MoveRight);
+	PlayerInputComponent->BindAxis("LookUp", this, &ACoopCharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &ACoopCharacter::AddControllerYawInput);
 }
 
