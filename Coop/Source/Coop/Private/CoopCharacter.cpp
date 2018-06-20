@@ -1,7 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CoopCharacter.h"
-
+#include "Camera/CameraComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
 ACoopCharacter::ACoopCharacter()
@@ -9,6 +10,12 @@ ACoopCharacter::ACoopCharacter()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	CameraArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
+	CameraArm->SetupAttachment(RootComponent);
+	CameraArm->bUsePawnControlRotation = true;
+
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
+	CameraComponent->SetupAttachment(CameraArm);
 }
 
 // Called when the game starts or when spawned
