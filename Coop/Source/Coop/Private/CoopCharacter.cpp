@@ -3,6 +3,7 @@
 #include "CoopCharacter.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/PawnMovementComponent.h"
 
 // Sets default values
 ACoopCharacter::ACoopCharacter()
@@ -16,6 +17,8 @@ ACoopCharacter::ACoopCharacter()
 
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(CameraArm);
+
+	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +38,16 @@ void ACoopCharacter::MoveRight(float Value)
 	AddMovementInput(GetActorRightVector()*Value);
 }
 
+void ACoopCharacter::BeginCrouch()
+{
+	Crouch();
+}
+
+void ACoopCharacter::EndCrouch()
+{
+	UnCrouch();
+}
+
 // Called every frame
 void ACoopCharacter::Tick(float DeltaTime)
 {
@@ -51,5 +64,10 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("MoveRight", this, &ACoopCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("LookUp", this, &ACoopCharacter::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("Turn", this, &ACoopCharacter::AddControllerYawInput);
+
+	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ACoopCharacter::BeginCrouch);
+	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ACoopCharacter::EndCrouch);
+
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACoopCharacter::Jump);
 }
 
