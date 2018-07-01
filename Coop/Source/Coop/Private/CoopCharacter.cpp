@@ -71,3 +71,11 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACoopCharacter::Jump);
 }
 
+FVector ACoopCharacter::GetPawnViewLocation() const
+{
+	if (CameraComponent)
+		return CameraComponent->GetComponentLocation();
+
+	return Super::GetPawnViewLocation();
+}
+
