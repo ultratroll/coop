@@ -30,8 +30,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* ImpactEffect;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* TraceEffect;
+
+	/** Name for the socket of the weapon. */
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName MuzzleSocketName;
+
+	/** Name of the parametter in the trail effect to design the destination location of the trail effect. */
+	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+	FName TracerTargetName;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
