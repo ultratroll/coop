@@ -40,7 +40,7 @@ void ACoopWeapon::Fire()
 		PawnOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 		
 		FVector ShotDirection = EyeRotation.Vector();
-		FVector EndLocation = EyeLocation + ShotDirection * 1000.0f;
+		FVector EndLocation = EyeLocation + (ShotDirection * 1000.0f);
 		FHitResult Hit;
 
 		FCollisionQueryParams QueryParams;
