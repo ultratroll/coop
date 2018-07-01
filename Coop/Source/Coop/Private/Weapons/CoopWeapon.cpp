@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CoopWeapon.h"
+#include "DrawDebugHelpers.h"
 
 // Sets default values
 ACoopWeapon::ACoopWeapon()
@@ -24,5 +25,30 @@ void ACoopWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ACoopWeapon::Fire()
+{
+	// Trace from the pawn eyes to the crosshair
+	AActor* Pawn = GetOwner();
+	if (Pawn)
+	{
+		FVector		EyeLocation;
+		FRotator	EyeRotation;
+		Pawn->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		FVector EndLocation = EyeLocation + EyeRotation.Vector() * 1000.0f;
+		FHitResult Hit;
+
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(Pawn);
+		QueryParams.AddIgnoredActor(this);
+		QueryParams.bTraceComplex = true;
+		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, EndLocation, ECollisionChannel::ECC_Visibility, QueryParams))
+		{
+			// Blocking hit, process damage
+		}
+
+		DrawDebugLine(GetWorld(), EyeLocation, EndLocation, FColor::White, false, 1);
+	}
 }
 
