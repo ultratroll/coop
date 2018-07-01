@@ -7,6 +7,7 @@
 #include "CoopWeapon.generated.h"
 
 class USkeletalMeshComponent;
+class UDamageType;
 
 UCLASS()
 class COOP_API ACoopWeapon : public AActor
@@ -26,11 +27,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	TSubclassOf<UDamageType> CoopWeaponDamage;
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	/** Fire the weapon. */
 	UFUNCTION(BlueprintCallable, Category= "Weapon")
 	void Fire();
-	
 };

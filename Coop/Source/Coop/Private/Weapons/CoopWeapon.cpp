@@ -2,6 +2,8 @@
 
 #include "CoopWeapon.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/DamageType.h"
 
 // Sets default values
 ACoopWeapon::ACoopWeapon()
@@ -30,22 +32,28 @@ void ACoopWeapon::Tick(float DeltaTime)
 void ACoopWeapon::Fire()
 {
 	// Trace from the pawn eyes to the crosshair
-	AActor* Pawn = GetOwner();
-	if (Pawn)
+	AActor* PawnOwner = GetOwner();
+	if (PawnOwner)
 	{
 		FVector		EyeLocation;
 		FRotator	EyeRotation;
-		Pawn->GetActorEyesViewPoint(EyeLocation, EyeRotation);
-		FVector EndLocation = EyeLocation + EyeRotation.Vector() * 1000.0f;
+		PawnOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
+		
+		FVector ShotDirection = EyeRotation.Vector();
+		FVector EndLocation = EyeLocation + ShotDirection * 1000.0f;
 		FHitResult Hit;
 
 		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(Pawn);
+		QueryParams.AddIgnoredActor(PawnOwner);
 		QueryParams.AddIgnoredActor(this);
 		QueryParams.bTraceComplex = true;
 		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, EndLocation, ECollisionChannel::ECC_Visibility, QueryParams))
 		{
 			// Blocking hit, process damage
+
+			AActor* HitActor = Hit.GetActor();
+
+			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
 		}
 
 		DrawDebugLine(GetWorld(), EyeLocation, EndLocation, FColor::White, false, 1);
