@@ -4,6 +4,7 @@
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/DamageType.h"
+#include "Particles/ParticleSystem.h"
 
 // Sets default values
 ACoopWeapon::ACoopWeapon()
@@ -13,6 +14,8 @@ ACoopWeapon::ACoopWeapon()
 
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComponent"));
 	RootComponent = MeshComponent;
+
+	MuzzleSocketName = "MuzzleSocket";
 }
 
 // Called when the game starts or when spawned
@@ -54,9 +57,14 @@ void ACoopWeapon::Fire()
 			AActor* HitActor = Hit.GetActor();
 
 			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
+
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 		}
 
-		DrawDebugLine(GetWorld(), EyeLocation, EndLocation, FColor::White, false, 1);
+		DrawDebugLine(GetWorld(), EyeLocation, EndLocation, FColor::Red, false, 1);
+
+		if (MuzzleEffect)
+			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComponent, MuzzleSocketName);
 	}
 }
 

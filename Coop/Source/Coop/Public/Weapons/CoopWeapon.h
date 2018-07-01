@@ -8,6 +8,7 @@
 
 class USkeletalMeshComponent;
 class UDamageType;
+class UParticleSystem;
 
 UCLASS()
 class COOP_API ACoopWeapon : public AActor
@@ -22,6 +23,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category= "Components")
 	USkeletalMeshComponent * MeshComponent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* MuzzleEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UParticleSystem* ImpactEffect;
+
+	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
+	FName MuzzleSocketName;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
