@@ -18,7 +18,7 @@ ACoopWeapon::ACoopWeapon()
 	RootComponent = MeshComponent;
 
 	MuzzleSocketName = "MuzzleSocket";
-	TracerTargetName = "Target";
+	TracerTargetName = "Target";		// Name of the parameter for the ending location of an effect that works like a trace bettwen two points
 }
 
 // Called when the game starts or when spawned
@@ -66,11 +66,10 @@ void ACoopWeapon::Fire()
 			TraceHit = Hit.ImpactPoint;
 
 			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
-
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+			
+			if (ImpactEffect)
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 		}
-
-		//DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::Red, false, 1);
 
 		if (MuzzleEffect)
 			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComponent, MuzzleSocketName);
