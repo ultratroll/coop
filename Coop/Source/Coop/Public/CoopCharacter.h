@@ -20,6 +20,16 @@ public:
 
 protected:
 
+	uint8 bWantsToZoom = false;
+
+	float DefaultZoom;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Zoom", meta= (ClampMin= 0.1f, ClampMax= 100.0f))
+	float ZoomInterpolationSpeed;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Zoom")
+	float TargetZoom;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= "Components")
 	UCameraComponent* CameraComponent;
 
@@ -37,6 +47,9 @@ protected:
 
 	void EndCrouch();
 
+	void BeginZoom();
+
+	void EndZoom();
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

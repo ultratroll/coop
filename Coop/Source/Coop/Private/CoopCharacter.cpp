@@ -19,13 +19,16 @@ ACoopCharacter::ACoopCharacter()
 	CameraComponent->SetupAttachment(CameraArm);
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
+
+	TargetZoom = 65.0f;
+	ZoomInterpolationSpeed = 20.0f;
 }
 
 // Called when the game starts or when spawned
 void ACoopCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	DefaultZoom = CameraComponent->FieldOfView;
 }
 
 void ACoopCharacter::MoveForward(float Value)
@@ -48,11 +51,24 @@ void ACoopCharacter::EndCrouch()
 	UnCrouch();
 }
 
+void ACoopCharacter::BeginZoom()
+{
+	bWantsToZoom= true;
+}
+
+void ACoopCharacter::EndZoom()
+{
+	bWantsToZoom= false;
+}
+
 // Called every frame
 void ACoopCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	float const DessiredZoom = bWantsToZoom ? TargetZoom : DefaultZoom;
+	float const InterpolatedZoom = FMath::FInterpTo(CameraComponent->FieldOfView, DessiredZoom, DeltaTime, ZoomInterpolationSpeed);
+	CameraComponent->SetFieldOfView(InterpolatedZoom);
 }
 
 // Called to bind functionality to input
@@ -67,6 +83,9 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &ACoopCharacter::BeginCrouch);
 	PlayerInputComponent->BindAction("Crouch", IE_Released, this, &ACoopCharacter::EndCrouch);
+
+	PlayerInputComponent->BindAction("Zoom", IE_Pressed, this, &ACoopCharacter::BeginZoom);
+	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ACoopCharacter::EndZoom);
 
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACoopCharacter::Jump);
 }
