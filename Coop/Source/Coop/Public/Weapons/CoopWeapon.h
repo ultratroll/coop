@@ -41,16 +41,13 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName TracerTargetName;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UFUNCTION()
+	void PlayFireEffect(FVector TraceHit);
 
 public:	
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> CoopWeaponDamage;
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 	/** Fire the weapon. */
 	UFUNCTION(BlueprintCallable, Category= "Weapon")

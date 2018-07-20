@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CoopCharacter.h"
+#include "CoopWeapon.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
@@ -20,6 +21,8 @@ ACoopCharacter::ACoopCharacter()
 
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
+	WeaponAttachSocketName = "WeaponSocketR";
+
 	TargetZoom = 65.0f;
 	ZoomInterpolationSpeed = 20.0f;
 }
@@ -29,6 +32,21 @@ void ACoopCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	DefaultZoom = CameraComponent->FieldOfView;
+
+	// Spawn a default weapon
+	if (DefaultWeaponClass)
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		EquipedWeapon = GetWorld()->SpawnActor<ACoopWeapon>(DefaultWeaponClass,FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+		if (EquipedWeapon)
+		{
+			EquipedWeapon->SetOwner(this);
+			EquipedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+		}
+	}
 }
 
 void ACoopCharacter::MoveForward(float Value)
@@ -61,6 +79,14 @@ void ACoopCharacter::EndZoom()
 	bWantsToZoom= false;
 }
 
+void ACoopCharacter::OnFireBegin()
+{
+	if (IsValid(EquipedWeapon))
+	{
+		EquipedWeapon->Fire();
+	}
+}
+
 // Called every frame
 void ACoopCharacter::Tick(float DeltaTime)
 {
@@ -88,6 +114,9 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Zoom", IE_Released, this, &ACoopCharacter::EndZoom);
 
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACoopCharacter::Jump);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ACoopCharacter::OnFireBegin);
+	//PlayerInputComponent->BindAction("Fire", IE_Released, this, &ACoopCharacter::OnFireEnd);
 }
 
 FVector ACoopCharacter::GetPawnViewLocation() const

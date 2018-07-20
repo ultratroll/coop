@@ -29,18 +29,18 @@ ACoopWeapon::ACoopWeapon()
 	TracerTargetName = "Target";		// Name of the parameter for the ending location of an effect that works like a trace bettwen two points
 }
 
-// Called when the game starts or when spawned
-void ACoopWeapon::BeginPlay()
+void ACoopWeapon::PlayFireEffect(FVector TraceHit)
 {
-	Super::BeginPlay();
-	
-}
+	if (MuzzleEffect)
+		UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComponent, MuzzleSocketName);
 
-// Called every frame
-void ACoopWeapon::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+	FVector MuzzleLocation = MeshComponent->GetSocketLocation(MuzzleSocketName);
 
+	if (TraceEffect)
+	{
+		UParticleSystemComponent* TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, MuzzleLocation);
+		TracerComponent->SetVectorParameter(TracerTargetName, TraceHit);
+	}
 }
 
 void ACoopWeapon::Fire()
@@ -84,16 +84,7 @@ void ACoopWeapon::Fire()
 			DrawDebugLine(GetWorld(), EyeLocation, TraceEnd, FColor::White, false, 1.0f, 0, 1.0f);
 		}
 
-		if (MuzzleEffect)
-			UGameplayStatics::SpawnEmitterAttached(MuzzleEffect, MeshComponent, MuzzleSocketName);
-
-		FVector MuzzleLocation = MeshComponent->GetSocketLocation(MuzzleSocketName);
-
-		if (TraceEffect)
-		{
-			UParticleSystemComponent* TracerComponent= UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, MuzzleLocation);
-			TracerComponent->SetVectorParameter(TracerTargetName, TraceHit);
-		}
+		PlayFireEffect(TraceHit);
 	}
 }
 

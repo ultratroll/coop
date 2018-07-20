@@ -8,6 +8,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class ACoopWeapon;
 
 UCLASS()
 class COOP_API ACoopCharacter : public ACharacter
@@ -36,6 +37,14 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USpringArmComponent* CameraArm;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<ACoopWeapon> DefaultWeaponClass;
+
+	ACoopWeapon* EquipedWeapon;
+
+	UPROPERTY(VisibleDefaultsOnly, Category= "Weapon")
+	FName WeaponAttachSocketName;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -50,6 +59,9 @@ protected:
 	void BeginZoom();
 
 	void EndZoom();
+
+	void OnFireBegin();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
