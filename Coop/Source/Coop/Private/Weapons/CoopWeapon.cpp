@@ -41,6 +41,19 @@ void ACoopWeapon::PlayFireEffect(FVector TraceHit)
 		UParticleSystemComponent* TracerComponent = UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), TraceEffect, MuzzleLocation);
 		TracerComponent->SetVectorParameter(TracerTargetName, TraceHit);
 	}
+
+	if (FireCameraShakeClass)
+	{
+		APawn* MyOwner = Cast<APawn>(GetOwner());
+		if (MyOwner)
+		{
+			APlayerController* PC = Cast<APlayerController>(MyOwner->GetController());
+			if (PC)
+			{
+				PC->ClientPlayCameraShake(FireCameraShakeClass);
+			}
+		}
+	}
 }
 
 void ACoopWeapon::Fire()

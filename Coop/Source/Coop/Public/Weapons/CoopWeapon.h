@@ -41,6 +41,9 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName TracerTargetName;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<UCameraShake> FireCameraShakeClass;
+
 	UFUNCTION()
 	void PlayFireEffect(FVector TraceHit);
 
