@@ -50,6 +50,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	TSubclassOf<UCameraShake> FireCameraShakeClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float BaseDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	float HeadshotDamageMultiplier;
+
 	UFUNCTION()
 	void PlayFireEffect(FVector TraceHit);
 

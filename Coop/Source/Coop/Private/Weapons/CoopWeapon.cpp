@@ -29,6 +29,9 @@ ACoopWeapon::ACoopWeapon()
 
 	MuzzleSocketName = "MuzzleSocket";
 	TracerTargetName = "Target";		// Name of the parameter for the ending location of an effect that works like a trace bettwen two points
+
+	BaseDamage = 20.0f;
+	HeadshotDamageMultiplier = 4.0f;
 }
 
 void ACoopWeapon::PlayFireEffect(FVector TraceHit)
@@ -89,12 +92,21 @@ void ACoopWeapon::Fire()
 
 			TraceHit = Hit.ImpactPoint;
 
-			UGameplayStatics::ApplyPointDamage(HitActor, 20.0f, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
+			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+
+			float ActualDamage = BaseDamage;
+
+			if (SurfaceType == ECC_COOP_PHYSUR_FLESHSENSITIVE)
+			{
+				ActualDamage *= HeadshotDamageMultiplier;
+			}
+
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
 			
 			if (ImpactEffect)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 
-			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			
 
 			UParticleSystem* SelectedEffect = nullptr;
 
