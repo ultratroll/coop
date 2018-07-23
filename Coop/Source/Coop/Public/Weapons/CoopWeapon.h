@@ -27,8 +27,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* MuzzleEffect;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Impact Effect")
 	UParticleSystem* ImpactEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Impact Effect")
+	UParticleSystem* FleshEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon|Impact Effect")
+	UParticleSystem* FleshSensitiveEffect;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	UParticleSystem* TraceEffect;
@@ -37,7 +43,7 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName MuzzleSocketName;
 
-	/** Name of the parametter in the trail effect to design the destination location of the trail effect. */
+	/** Name of the parameter in the trail effect to design the destination location of the trail effect. */
 	UPROPERTY(VisibleDefaultsOnly, Category = "Weapon")
 	FName TracerTargetName;
 
