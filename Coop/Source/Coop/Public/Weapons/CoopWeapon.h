@@ -56,15 +56,33 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
 	float HeadshotDamageMultiplier;
 
+	FTimerHandle FireTimer;
+
+	/** Last time weapon was fired. */
+	float LastFireTime;
+
+	/** RPM, Bullets per minute. */
+	UPROPERTY(EditDefaultsOnly)
+	float FireRate;
+
+	/** Based on firerate. */
+	UPROPERTY(Category = "Weapon")
+	float TimeBettwenShots;
+
 	UFUNCTION()
 	void PlayFireEffect(FVector TraceHit);
 
+	/** Fire the weapon. */
+	virtual void Fire();
+
 public:	
+
+	virtual void BeginPlay() override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	TSubclassOf<UDamageType> CoopWeaponDamage;
 
-	/** Fire the weapon. */
-	UFUNCTION(BlueprintCallable, Category= "Weapon")
-	virtual void Fire();
+	void StartFire();
+
+	void StopFire();
 };

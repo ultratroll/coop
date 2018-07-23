@@ -83,7 +83,15 @@ void ACoopCharacter::OnFireBegin()
 {
 	if (IsValid(EquipedWeapon))
 	{
-		EquipedWeapon->Fire();
+		EquipedWeapon->StartFire();
+	}
+}
+
+void ACoopCharacter::OnFireEnd()
+{
+	if (IsValid(EquipedWeapon))
+	{
+		EquipedWeapon->StopFire();
 	}
 }
 
@@ -116,7 +124,7 @@ void ACoopCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACoopCharacter::Jump);
 
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &ACoopCharacter::OnFireBegin);
-	//PlayerInputComponent->BindAction("Fire", IE_Released, this, &ACoopCharacter::OnFireEnd);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &ACoopCharacter::OnFireEnd);
 }
 
 FVector ACoopCharacter::GetPawnViewLocation() const

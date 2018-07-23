@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopDefinitions.h"
+#include "TimerManager.h"
 
 static int32 bDebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(
@@ -32,6 +33,8 @@ ACoopWeapon::ACoopWeapon()
 
 	BaseDamage = 20.0f;
 	HeadshotDamageMultiplier = 4.0f;
+
+	FireRate = 600.0f;
 }
 
 void ACoopWeapon::PlayFireEffect(FVector TraceHit)
@@ -107,7 +110,6 @@ void ACoopWeapon::Fire()
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 
 			
-
 			UParticleSystem* SelectedEffect = nullptr;
 
 			switch (SurfaceType)
@@ -136,6 +138,28 @@ void ACoopWeapon::Fire()
 		}
 
 		PlayFireEffect(TraceHit);
+
+		LastFireTime = GetWorld()->TimeSeconds;
 	}
+}
+
+void ACoopWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+	TimeBettwenShots = 60.0 / FireRate;
+}
+
+void ACoopWeapon::StartFire()
+{
+	// To avoid spaming for ignoring the fire rate, we calculate a delay, if enough time has passed since the last shot it will be possible to make the shot.
+	const float FirstDelay = FMath::Max(LastFireTime + TimeBettwenShots - GetWorld()->TimeSeconds, 0.0f);
+
+	GetWorldTimerManager().SetTimer(FireTimer, this, &ACoopWeapon::Fire, TimeBettwenShots, true, FirstDelay);
+}
+
+void ACoopWeapon::StopFire()
+{
+	GetWorldTimerManager().ClearTimer(FireTimer);
 }
 
