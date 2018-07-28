@@ -9,6 +9,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class ACoopWeapon;
+class UCoopHealthComponent;
 
 UCLASS()
 class COOP_API ACoopCharacter : public ACharacter
@@ -30,6 +31,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Zoom")
 	float TargetZoom;
+
+	/** Component to manage health. */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UCoopHealthComponent* HealthComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= "Components")
 	UCameraComponent* CameraComponent;

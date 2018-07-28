@@ -3,6 +3,9 @@
 #include "CoopCharacter.h"
 #include "CoopWeapon.h"
 #include "Camera/CameraComponent.h"
+#include "CoopDefinitions.h"
+#include "CoopHealthComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
 
@@ -19,9 +22,14 @@ ACoopCharacter::ACoopCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(CameraArm);
 
+	// We want weapons shots to hit our character mesh, not the capsule
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_COLLISION_WEAPON, ECR_Ignore);
+
 	GetMovementComponent()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	WeaponAttachSocketName = "WeaponSocketR";
+
+	HealthComponent = CreateDefaultSubobject<UCoopHealthComponent>(TEXT("HealthComponent"));
 
 	TargetZoom = 65.0f;
 	ZoomInterpolationSpeed = 20.0f;

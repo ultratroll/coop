@@ -66,7 +66,7 @@ protected:
 	float FireRate;
 
 	/** Based on firerate. */
-	UPROPERTY(Category = "Weapon")
+	UPROPERTY()
 	float TimeBettwenShots;
 
 	UFUNCTION()
