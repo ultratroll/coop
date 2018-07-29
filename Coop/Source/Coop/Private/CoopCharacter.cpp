@@ -55,6 +55,8 @@ void ACoopCharacter::BeginPlay()
 			EquipedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
 		}
 	}
+
+	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ACoopCharacter::OnHealthChanged);
 }
 
 void ACoopCharacter::MoveForward(float Value)
@@ -100,6 +102,22 @@ void ACoopCharacter::OnFireEnd()
 	if (IsValid(EquipedWeapon))
 	{
 		EquipedWeapon->StopFire();
+	}
+}
+
+void ACoopCharacter::OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	if (Health <= 0 && !bDied)
+	{
+		// Die!
+		bDied = true;
+		GetMovementComponent()->StopMovementImmediately();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		DetachFromControllerPendingDestroy();
+		SetLifeSpan(10.0f);
+
+		// Ragdoll later
 	}
 }
 

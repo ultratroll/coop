@@ -22,7 +22,10 @@ public:
 
 protected:
 
-	uint8 bWantsToZoom = false;
+	uint8 bWantsToZoom : 1;
+
+	UPROPERTY(BlueprintReadOnly, Category= "Player")
+	uint8 bDied : 1;
 
 	float DefaultZoom;
 
@@ -68,6 +71,9 @@ protected:
 	void OnFireBegin();
 
 	void OnFireEnd();
+
+	UFUNCTION()
+	void OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 public:	
 	// Called every frame
