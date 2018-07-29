@@ -10,6 +10,8 @@
  *	Component to manage health.
  */
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_SixParams(FOnHealthChanged, UCoopHealthComponent*, HealthComponent, float, Health, float, HealthDelta, const class UDamageType*, DamageType, class AController*, InstigatedBy, AActor*, DamageCauser);
+
 UCLASS( ClassGroup=(Coop), meta=(BlueprintSpawnableComponent) )
 class COOP_API UCoopHealthComponent : public UActorComponent
 {
@@ -19,6 +21,8 @@ public:
 	// Sets default values for this component's properties
 	UCoopHealthComponent();
 
+	FORCEINLINE FOnHealthChanged& GetOnHealthChanged() { return OnHealthChanged; }
+
 protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, Category= "HealthComponent")
@@ -26,6 +30,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
 	float DefaultHealth= 100.0f;
+
+	UPROPERTY(BlueprintAssignable, Category= "Events")
+	FOnHealthChanged OnHealthChanged;
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
