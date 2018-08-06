@@ -68,6 +68,12 @@ void ACoopWeapon::PlayFireEffect(FVector TraceHit)
 
 void ACoopWeapon::Fire()
 {
+	// If a client machine, lets ask the server to fire from there.
+	if (Role < ROLE_Authority)
+	{
+		ServerFire();
+	}
+
 	// Trace from the pawn eyes to the crosshair
 	AActor* PawnOwner = GetOwner();
 	if (PawnOwner)
@@ -143,6 +149,16 @@ void ACoopWeapon::Fire()
 
 		LastFireTime = GetWorld()->TimeSeconds;
 	}
+}
+
+void ACoopWeapon::ServerFire_Implementation()
+{
+	Fire();
+}
+
+bool ACoopWeapon::ServerFire_Validate()
+{
+	return true;
 }
 
 void ACoopWeapon::BeginPlay()

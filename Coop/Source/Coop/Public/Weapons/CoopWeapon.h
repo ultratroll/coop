@@ -75,6 +75,10 @@ protected:
 	/** Fire the weapon. */
 	virtual void Fire();
 
+	/** Fire the weapon from server. */
+	UFUNCTION(Server, Reliable, WithValidation)
+	void ServerFire();
+
 public:	
 
 	virtual void BeginPlay() override;
