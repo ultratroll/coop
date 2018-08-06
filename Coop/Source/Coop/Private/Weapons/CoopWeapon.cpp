@@ -35,6 +35,8 @@ ACoopWeapon::ACoopWeapon()
 	HeadshotDamageMultiplier = 4.0f;
 
 	FireRate = 600.0f;
+
+	SetReplicates(true);
 }
 
 void ACoopWeapon::PlayFireEffect(FVector TraceHit)

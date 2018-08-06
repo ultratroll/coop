@@ -48,6 +48,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<ACoopWeapon> DefaultWeaponClass;
 
+	UPROPERTY(Replicated)
 	ACoopWeapon* EquipedWeapon;
 
 	UPROPERTY(VisibleDefaultsOnly, Category= "Weapon")
@@ -83,5 +84,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual FVector GetPawnViewLocation() const override;
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeTimeProps) const override;
 	
 };

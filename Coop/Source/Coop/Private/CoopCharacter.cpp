@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/PawnMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACoopCharacter::ACoopCharacter()
@@ -40,23 +41,26 @@ void ACoopCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	DefaultZoom = CameraComponent->FieldOfView;
+	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ACoopCharacter::OnHealthChanged);
 
-	// Spawn a default weapon
-	if (DefaultWeaponClass)
+	// Only spawn in the server machine
+	if (Role= ROLE_Authority)
 	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		EquipedWeapon = GetWorld()->SpawnActor<ACoopWeapon>(DefaultWeaponClass,FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
-
-		if (EquipedWeapon)
+		// Spawn a default weapon
+		if (DefaultWeaponClass)
 		{
-			EquipedWeapon->SetOwner(this);
-			EquipedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+			EquipedWeapon = GetWorld()->SpawnActor<ACoopWeapon>(DefaultWeaponClass, FVector::ZeroVector, FRotator::ZeroRotator, SpawnParams);
+
+			if (EquipedWeapon)
+			{
+				EquipedWeapon->SetOwner(this);
+				EquipedWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, WeaponAttachSocketName);
+			}
 		}
 	}
-
-	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ACoopCharacter::OnHealthChanged);
 }
 
 void ACoopCharacter::MoveForward(float Value)
@@ -161,3 +165,9 @@ FVector ACoopCharacter::GetPawnViewLocation() const
 	return Super::GetPawnViewLocation();
 }
 
+void ACoopCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACoopCharacter, EquipedWeapon);
+}
