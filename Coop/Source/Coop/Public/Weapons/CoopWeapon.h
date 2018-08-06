@@ -10,6 +10,23 @@ class USkeletalMeshComponent;
 class UDamageType;
 class UParticleSystem;
 
+/**
+ * Contains information on a single hitscan weapon line trace
+ */
+USTRUCT()
+struct FHitScanTrace
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY()
+	FVector_NetQuantize TraceFrom;
+
+	UPROPERTY()
+	FVector_NetQuantize TraceTo;
+};
+
 UCLASS()
 class COOP_API ACoopWeapon : public AActor
 {
@@ -78,6 +95,12 @@ protected:
 	/** Fire the weapon from server. */
 	UFUNCTION(Server, Reliable, WithValidation)
 	void ServerFire();
+
+	UPROPERTY(ReplicatedUsing= OnRep_HitScanTrace)
+	FHitScanTrace HitScanData;
+
+	UFUNCTION()
+	void OnRep_HitScanTrace();
 
 public:	
 

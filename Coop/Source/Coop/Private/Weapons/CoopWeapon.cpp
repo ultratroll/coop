@@ -10,6 +10,7 @@
 #include "PhysicalMaterials/PhysicalMaterial.h"
 #include "CoopDefinitions.h"
 #include "TimerManager.h"
+#include "Net/UnrealNetwork.h"
 
 static int32 bDebugWeaponDrawing = 0;
 FAutoConsoleVariableRef CVARDebugWeaponDrawing(
@@ -147,8 +148,19 @@ void ACoopWeapon::Fire()
 
 		PlayFireEffect(TraceHit);
 
+		if (Role == ROLE_Authority)
+		{
+			HitScanData.TraceTo= TraceHit;
+		}
+
 		LastFireTime = GetWorld()->TimeSeconds;
 	}
+}
+
+void ACoopWeapon::OnRep_HitScanTrace()
+{
+	// Play cosmetic effect
+	PlayFireEffect(HitScanData.TraceTo);
 }
 
 void ACoopWeapon::ServerFire_Implementation()
@@ -181,3 +193,9 @@ void ACoopWeapon::StopFire()
 	GetWorldTimerManager().ClearTimer(FireTimer);
 }
 
+void ACoopWeapon::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(ACoopWeapon, HitScanData, COND_SkipOwner); // The effect will play in the owner, we only want to replicate it in all other machines
+}
