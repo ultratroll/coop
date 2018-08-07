@@ -36,6 +36,11 @@ ACoopWeapon::ACoopWeapon()
 	HeadshotDamageMultiplier = 4.0f;
 
 	FireRate = 600.0f;
+	
+	// As weird as it is, we need to increase the frequency this updates in network, otherwise the shots are too far betweens
+	// This values are similar to Counter Strike. We want our game to be responsive in network.
+	NetUpdateFrequency = 70.0f;
+	MinNetUpdateFrequency = 33.0f;
 
 	SetReplicates(true);
 }
@@ -96,6 +101,8 @@ void ACoopWeapon::Fire()
 		QueryParams.bTraceComplex = true;
 		QueryParams.bReturnPhysicalMaterial = true;
 		
+		EPhysicalSurface SurfaceType= SurfaceType_Default;
+
 		if (GetWorld()->LineTraceSingleByChannel(Hit, EyeLocation, TraceEnd, ECC_COLLISION_WEAPON, QueryParams))
 		{
 			// Blocking hit, process damage
@@ -104,7 +111,7 @@ void ACoopWeapon::Fire()
 
 			TraceHit = Hit.ImpactPoint;
 
-			EPhysicalSurface SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
+			SurfaceType = UPhysicalMaterial::DetermineSurfaceType(Hit.PhysMaterial.Get());
 
 			float ActualDamage = BaseDamage;
 
@@ -119,26 +126,8 @@ void ACoopWeapon::Fire()
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
 
 			
-			UParticleSystem* SelectedEffect = nullptr;
 
-			switch (SurfaceType)
-			{
-				case SurfaceType_Default:
-					SelectedEffect = ImpactEffect; 
-					break;
-				case ECC_COOP_PHYSUR_FLESHREGULAR: 
-					SelectedEffect = FleshEffect;
-					break;
-				case ECC_COOP_PHYSUR_FLESHSENSITIVE:
-					SelectedEffect = FleshSensitiveEffect;
-					break;
-				default:
-					SelectedEffect = ImpactEffect;
-					break;
-			}
-
-			if (SelectedEffect)
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
+			PlayImpactEffect(SurfaceType, Hit.ImpactPoint);
 		}
 
 		if (bDebugWeaponDrawing > 0)
@@ -151,6 +140,9 @@ void ACoopWeapon::Fire()
 		if (Role == ROLE_Authority)
 		{
 			HitScanData.TraceTo= TraceHit;
+			HitScanData.SurfaceType = SurfaceType;
+			HitScanData.bClean = 1;
+			HitScanData.bClean = 0;
 		}
 
 		LastFireTime = GetWorld()->TimeSeconds;
@@ -161,11 +153,42 @@ void ACoopWeapon::OnRep_HitScanTrace()
 {
 	// Play cosmetic effect
 	PlayFireEffect(HitScanData.TraceTo);
+	PlayImpactEffect(HitScanData.SurfaceType, HitScanData.TraceTo);
+}
+
+void ACoopWeapon::PlayImpactEffect(const EPhysicalSurface& SurfaceType, FVector ImpactPoint)
+{
+	UParticleSystem* SelectedEffect = nullptr;
+
+	switch (SurfaceType)
+	{
+	case SurfaceType_Default:
+		SelectedEffect = ImpactEffect;
+		break;
+	case ECC_COOP_PHYSUR_FLESHREGULAR:
+		SelectedEffect = FleshEffect;
+		break;
+	case ECC_COOP_PHYSUR_FLESHSENSITIVE:
+		SelectedEffect = FleshSensitiveEffect;
+		break;
+	default:
+		SelectedEffect = ImpactEffect;
+		break;
+	}
+
+	const FVector MuzzleLocation = MeshComponent->GetSocketLocation(MuzzleSocketName);
+
+	FVector ShotDirection = ImpactPoint - MuzzleLocation;
+	ShotDirection.Normalize();
+
+	if (SelectedEffect)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), SelectedEffect, ImpactPoint, ShotDirection.Rotation());
 }
 
 void ACoopWeapon::ServerFire_Implementation()
 {
 	Fire();
+	OnRep_HitScanTrace(); // To make sure the effects of the hitscan are called in server too.
 }
 
 bool ACoopWeapon::ServerFire_Validate()
