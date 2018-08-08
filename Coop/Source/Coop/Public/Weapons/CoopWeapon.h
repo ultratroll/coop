@@ -25,8 +25,6 @@ public:
 
 	UPROPERTY()
 	FVector_NetQuantize TraceTo;
-
-	uint8 bClean = 0;
 };
 
 UCLASS()

@@ -24,7 +24,7 @@ protected:
 
 	uint8 bWantsToZoom : 1;
 
-	UPROPERTY(BlueprintReadOnly, Category= "Player")
+	UPROPERTY(Replicated, BlueprintReadOnly, Category= "Player")
 	uint8 bDied : 1;
 
 	float DefaultZoom;

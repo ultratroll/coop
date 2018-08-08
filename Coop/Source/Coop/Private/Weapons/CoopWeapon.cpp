@@ -141,8 +141,6 @@ void ACoopWeapon::Fire()
 		{
 			HitScanData.TraceTo= TraceHit;
 			HitScanData.SurfaceType = SurfaceType;
-			HitScanData.bClean = 1;
-			HitScanData.bClean = 0;
 		}
 
 		LastFireTime = GetWorld()->TimeSeconds;

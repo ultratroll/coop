@@ -25,7 +25,7 @@ public:
 
 protected:
 
-	UPROPERTY(Transient, BlueprintReadOnly, Category= "HealthComponent")
+	UPROPERTY(Replicated, Transient, BlueprintReadOnly, Category= "HealthComponent")
 	float Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")

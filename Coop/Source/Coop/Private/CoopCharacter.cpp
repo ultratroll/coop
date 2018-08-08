@@ -170,4 +170,5 @@ void ACoopCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ACoopCharacter, EquipedWeapon);
+	DOREPLIFETIME(ACoopCharacter, bDied);
 }
