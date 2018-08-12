@@ -5,6 +5,7 @@
 #include "Components/MeshComponent.h"
 #include "PhysicsEngine/RadialForceComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACoopExplosiveBarrel::ACoopExplosiveBarrel()
@@ -27,6 +28,9 @@ ACoopExplosiveBarrel::ACoopExplosiveBarrel()
 	RadialForceComponent->SetupAttachment(MeshComponent);
 	RadialForceComponent->SetRelativeLocation(FVector::ZeroVector);
 	RadialForceComponent->SetRelativeRotation(FRotator::ZeroRotator);
+
+	SetReplicates(true);
+	SetReplicateMovement(true);
 }
 
 // Called when the game starts or when spawned
@@ -37,12 +41,8 @@ void ACoopExplosiveBarrel::BeginPlay()
 	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ACoopExplosiveBarrel::OnHealthChanged);
 }
 
-void ACoopExplosiveBarrel::Explode()
+void ACoopExplosiveBarrel::ExplodeVissualEffect()
 {
- 	RadialForceComponent->FireImpulse();
-
-	MeshComponent->AddImpulse(GetActorUpVector() * ForceExplosion, NAME_None, true);
-
 	if (ExplosionEffect)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation(), GetActorRotation());
 
@@ -56,11 +56,28 @@ void ACoopExplosiveBarrel::OnHealthChanged(UCoopHealthComponent* MyHealthCompone
 	{
 		// Die!
 		bIsExploding = true;
-		
-		Explode();
+
+		// We want to have this impulse happening on the server (server, remember that the health component is only used if there is authority)
+		RadialForceComponent->FireImpulse();
+		MeshComponent->AddImpulse(GetActorUpVector() * ForceExplosion, NAME_None, true);
+
+		// Since its server, lets make sure to call this here
+		OnRep_Explosion();
 
 		SetLifeSpan(10.0f);
 
 		// Ragdoll later
 	}
+}
+
+void ACoopExplosiveBarrel::OnRep_Explosion()
+{
+	ExplodeVissualEffect();
+}
+
+void ACoopExplosiveBarrel::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACoopExplosiveBarrel, bIsExploding);
 }

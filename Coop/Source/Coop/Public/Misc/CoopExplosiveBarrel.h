@@ -21,7 +21,7 @@ public:
 protected:
 
 	/** Is explosing ?. */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_Explosion)
 	uint8 bIsExploding : 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category= "Components")
@@ -50,10 +50,13 @@ protected:
 	virtual void BeginPlay() override;
 
 	UFUNCTION()
-	void Explode();
+	void ExplodeVissualEffect();
 
 	UFUNCTION()
 	void OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UFUNCTION()
+	void OnRep_Explosion();
 
 public:		
 	
