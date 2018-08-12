@@ -14,6 +14,7 @@ class COOP_API ATracker : public APawn
 	GENERATED_BODY()
 
 public:
+	
 	// Sets default values for this pawn's properties
 	ATracker();
 
