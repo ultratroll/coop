@@ -6,6 +6,7 @@
 #include "AI/Navigation/NavigationSystem.h"
 #include "AI/Navigation/NavigationPath.h"
 #include "GameFramework/Character.h"
+#include "DrawDebugHelpers.h"
 
 /**
  *	Simple Tracker.
@@ -20,6 +21,11 @@ ATracker::ATracker()
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	RootComponent = MeshComponent;
 
+	MeshComponent->SetSimulatePhysics(true);
+
+	MovementForce = 1000.0f;
+	RequiredDistanceToTarget = 100.0f;
+	bUseVelocityChange = false;
 }
 
 // Called when the game starts or when spawned
@@ -28,10 +34,12 @@ void ATracker::BeginPlay()
 	Super::BeginPlay();
 
 	SetCanAffectNavigationGeneration(false);
-	
+
+	// Find initial point to move to.
+	NextPoint = GetNextPathPoint();
 }
 
-FVector ATracker::GetNextPathPoint()
+const FVector ATracker::GetNextPathPoint()
 {
 	// Hack to get player location
 	ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
@@ -52,4 +60,25 @@ void ATracker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	const float DistanceToTarget = (GetActorLocation() - NextPoint).Size();
+
+	if (DistanceToTarget <= RequiredDistanceToTarget)
+	{
+		NextPoint = GetNextPathPoint();
+
+		DrawDebugString(GetWorld(), GetActorLocation(), "Target reached",(AActor*)0, FColor::Green, 0, false);
+	}
+	else
+	{
+		// Keep moving.
+		FVector ForceDirection = NextPoint - GetActorLocation();
+		ForceDirection.Normalize();
+		ForceDirection *= MovementForce;
+
+		MeshComponent->AddImpulse(ForceDirection, NAME_None, bUseVelocityChange);
+
+		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation()+ForceDirection, 32.0f, FColor::Blue, false, 0, 0, 1);
+	}
+
+	DrawDebugSphere(GetWorld(), NextPoint, 20.0f, 12, FColor::Yellow, false,0, 0, 1);
 }
