@@ -2,6 +2,10 @@
 
 #include "Tracker.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "AI/Navigation/NavigationSystem.h"
+#include "AI/Navigation/NavigationPath.h"
+#include "GameFramework/Character.h"
 
 /**
  *	Simple Tracker.
@@ -25,6 +29,22 @@ void ATracker::BeginPlay()
 
 	SetCanAffectNavigationGeneration(false);
 	
+}
+
+FVector ATracker::GetNextPathPoint()
+{
+	// Hack to get player location
+	ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
+
+	UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), Character);
+
+	// The first point in the path is always the current location, we want the second one to know where to push
+	if (NavPath->PathPoints.Num() > 1)
+	{
+		return NavPath->PathPoints[1];
+	}
+
+	return GetActorLocation();
 }
 
 // Called every frame

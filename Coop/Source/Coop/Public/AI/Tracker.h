@@ -19,11 +19,17 @@ public:
 	ATracker();
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, Category= "Components")
-	UStaticMeshComponent* MeshComponent;
+	/**
+	*	We need the path points to know where to move, since the tracker will move using forces.
+	*/
+	FVector GetNextPathPoint();
 
 public:	
 	// Called every frame
