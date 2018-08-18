@@ -7,6 +7,7 @@
 #include "Tracker.generated.h"
 
 class UStaticMeshComponent;
+class UCoopHealthComponent;
 
 UCLASS(Blueprintable)
 class COOP_API ATracker : public APawn
@@ -19,6 +20,9 @@ public:
 	ATracker();
 
 protected:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= "Components")
+	UCoopHealthComponent* HealthComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UStaticMeshComponent* MeshComponent;
@@ -42,6 +46,12 @@ protected:
 	*	We need the path points to know where to move, since the tracker will move using forces.
 	*/
 	const FVector GetNextPathPoint();
+
+	UFUNCTION()
+	void OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
+
+	UFUNCTION()
+	void Explode();
 
 public:	
 	// Called every frame

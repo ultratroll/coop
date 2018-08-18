@@ -7,6 +7,7 @@
 #include "AI/Navigation/NavigationPath.h"
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
+#include "CoopHealthComponent.h"
 
 /**
  *	Simple Tracker.
@@ -22,6 +23,9 @@ ATracker::ATracker()
 	RootComponent = MeshComponent;
 
 	MeshComponent->SetSimulatePhysics(true);
+
+	HealthComponent = CreateDefaultSubobject<UCoopHealthComponent>(TEXT("Health Component"));
+	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ATracker::OnHealthChanged);
 
 	MovementForce = 1000.0f;
 	RequiredDistanceToTarget = 100.0f;
@@ -53,6 +57,20 @@ const FVector ATracker::GetNextPathPoint()
 	}
 
 	return GetActorLocation();
+}
+
+void ATracker::OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	// TODO:: When health reaches 0, lets explode
+
+	// TODO:: lets pulsate the material
+
+	UE_LOG(LogTemp, Warning, TEXT("Health %s of %s"), *FString::SanitizeFloat(Health), *(DamageCauser->GetName()));
+}
+
+void ATracker::Explode()
+{
+
 }
 
 // Called every frame
