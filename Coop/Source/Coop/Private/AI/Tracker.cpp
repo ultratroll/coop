@@ -64,6 +64,13 @@ void ATracker::OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float He
 	// TODO:: When health reaches 0, lets explode
 
 	// TODO:: lets pulsate the material
+	if (!IsValid(MaterialInstance))
+	{
+		MaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0, MeshComponent->GetMaterial(0));
+	}
+
+	if (IsValid(MaterialInstance))
+		MaterialInstance->SetScalarParameterValue("LastTimeDamageReceived", GetWorld()->TimeSeconds);
 
 	UE_LOG(LogTemp, Warning, TEXT("Health %s of %s"), *FString::SanitizeFloat(Health), *(DamageCauser->GetName()));
 }
@@ -80,11 +87,12 @@ void ATracker::Tick(float DeltaTime)
 
 	const float DistanceToTarget = (GetActorLocation() - NextPoint).Size();
 
+	NextPoint = GetNextPathPoint();
+
 	if (DistanceToTarget <= RequiredDistanceToTarget)
 	{
-		NextPoint = GetNextPathPoint();
-
-		DrawDebugString(GetWorld(), GetActorLocation(), "Target reached",(AActor*)0, FColor::Green, 0, false);
+		if (bDebugTracker!=0)
+			DrawDebugString(GetWorld(), GetActorLocation(), "Target reached",(AActor*)0, FColor::Green, 0, false);
 	}
 	else
 	{
@@ -95,8 +103,10 @@ void ATracker::Tick(float DeltaTime)
 
 		MeshComponent->AddImpulse(ForceDirection, NAME_None, bUseVelocityChange);
 
-		DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation()+ForceDirection, 32.0f, FColor::Blue, false, 0, 0, 1);
+		if (bDebugTracker != 0)
+			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32.0f, FColor::Blue, false, 0, 0, 1);
 	}
 
-	DrawDebugSphere(GetWorld(), NextPoint, 20.0f, 12, FColor::Yellow, false,0, 0, 1);
+	if (bDebugTracker != 0)
+		DrawDebugSphere(GetWorld(), NextPoint, 5.0f, 12, FColor::Yellow, false, 0, 0, 1);
 }

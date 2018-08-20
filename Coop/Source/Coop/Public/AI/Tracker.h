@@ -16,10 +16,16 @@ class COOP_API ATracker : public APawn
 
 public:
 	
+	UPROPERTY(EditAnywhere, Category= "Debug")
+	uint8 bDebugTracker : 1;
+
 	// Sets default values for this pawn's properties
 	ATracker();
 
 protected:
+
+	UPROPERTY(Transient)
+	UMaterialInstanceDynamic * MaterialInstance;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= "Components")
 	UCoopHealthComponent* HealthComponent;
