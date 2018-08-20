@@ -30,6 +30,9 @@ ATracker::ATracker()
 	MovementForce = 1000.0f;
 	RequiredDistanceToTarget = 100.0f;
 	bUseVelocityChange = false;
+
+	ExplosionDamage = 40.0f;
+	ExplosionRadius= 200.0f;
 }
 
 // Called when the game starts or when spawned
@@ -61,9 +64,6 @@ const FVector ATracker::GetNextPathPoint()
 
 void ATracker::OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	// TODO:: When health reaches 0, lets explode
-
-	// TODO:: lets pulsate the material
 	if (!IsValid(MaterialInstance))
 	{
 		MaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0, MeshComponent->GetMaterial(0));
@@ -72,12 +72,32 @@ void ATracker::OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float He
 	if (IsValid(MaterialInstance))
 		MaterialInstance->SetScalarParameterValue("LastTimeDamageReceived", GetWorld()->TimeSeconds);
 
-	UE_LOG(LogTemp, Warning, TEXT("Health %s of %s"), *FString::SanitizeFloat(Health), *(DamageCauser->GetName()));
+	if (bDebugTracker)
+		UE_LOG(LogTemp, Warning, TEXT("Health %s of %s"), *FString::SanitizeFloat(Health), *(DamageCauser->GetName()));
+
+	if (Health <= 0)
+		Explode();
 }
 
 void ATracker::Explode()
 {
+	if (bExploded)
+		return;
 
+	bExploded = true;
+
+	if (ExplosionEffect)
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
+
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(this);
+
+	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController());
+
+	if (bDebugTracker)
+		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1);
+
+	Destroy();
 }
 
 // Called every frame

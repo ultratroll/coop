@@ -24,6 +24,9 @@ public:
 
 protected:
 
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UParticleSystem* ExplosionEffect;
+
 	UPROPERTY(Transient)
 	UMaterialInstanceDynamic * MaterialInstance;
 
@@ -36,6 +39,12 @@ protected:
 	/** Next point to move to. */
 	FVector NextPoint;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Explosion")
+	float ExplosionDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Explosion")
+	float ExplosionRadius;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker")
 	float MovementForce;
 
@@ -44,6 +53,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category= "Tracker")
 	uint8 bUseVelocityChange : 1;
+
+	UPROPERTY(Transient)
+	uint8 bExploded : 1;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
