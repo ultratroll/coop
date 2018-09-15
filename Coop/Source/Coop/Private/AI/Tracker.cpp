@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "DrawDebugHelpers.h"
 #include "CoopHealthComponent.h"
+#include "CoopCharacter.h"
+#include "Components/SphereComponent.h"
 
 /**
  *	Simple Tracker.
@@ -26,6 +28,13 @@ ATracker::ATracker()
 
 	HealthComponent = CreateDefaultSubobject<UCoopHealthComponent>(TEXT("Health Component"));
 	HealthComponent->GetOnHealthChanged().AddDynamic(this, &ATracker::OnHealthChanged);
+
+	DamageSphere = CreateDefaultSubobject<USphereComponent>(TEXT("DamageTrigger"));
+	DamageSphere->SetSphereRadius(200.0f);
+	DamageSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	DamageSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	DamageSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	DamageSphere->SetupAttachment(RootComponent);
 
 	MovementForce = 1000.0f;
 	RequiredDistanceToTarget = 100.0f;
@@ -100,6 +109,11 @@ void ATracker::Explode()
 	Destroy();
 }
 
+void ATracker::DamageSelf()
+{
+	UGameplayStatics::ApplyDamage(this, 20.0f, GetInstigatorController(), this, nullptr);
+}
+
 // Called every frame
 void ATracker::Tick(float DeltaTime)
 {
@@ -129,4 +143,18 @@ void ATracker::Tick(float DeltaTime)
 
 	if (bDebugTracker != 0)
 		DrawDebugSphere(GetWorld(), NextPoint, 5.0f, 12, FColor::Yellow, false, 0, 0, 1);
+}
+
+void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	if (bStartedSelfDestruct != 0)
+		return;
+
+	ACoopCharacter* CharacterPawn = Cast<ACoopCharacter>(OtherActor);
+
+	if (CharacterPawn)
+	{
+		GetWorld()->GetTimerManager().SetTimer(TimerSelfDamage, this, &ATracker::DamageSelf, 0.5f, true, 0.0f);
+		bStartedSelfDestruct = true;
+	}
 }

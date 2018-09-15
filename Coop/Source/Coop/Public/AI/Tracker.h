@@ -8,6 +8,7 @@
 
 class UStaticMeshComponent;
 class UCoopHealthComponent;
+class USphereComponent;
 
 UCLASS(Blueprintable)
 class COOP_API ATracker : public APawn
@@ -36,6 +37,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UStaticMeshComponent* MeshComponent;
 
+	UPROPERTY()
+	USphereComponent* DamageSphere;
+
 	/** Next point to move to. */
 	FVector NextPoint;
 
@@ -57,6 +61,13 @@ protected:
 	UPROPERTY(Transient)
 	uint8 bExploded : 1;
 
+	UPROPERTY(Transient)
+	uint8 bStartedSelfDestruct : 1;
+
+	/** If the tracker touches a coopcharacter, we want it to self damage until exploding, instead of exploding instantly. */
+	UPROPERTY()
+	FTimerHandle TimerSelfDamage;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -71,7 +82,12 @@ protected:
 	UFUNCTION()
 	void Explode();
 
+	UFUNCTION()
+	void DamageSelf();
+
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;	
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
 };
