@@ -14,3 +14,4 @@
  */
 
 #define ECC_COLLISION_WEAPON	ECC_GameTraceChannel1
+#define ECC_ENEMY		ECC_GameTraceChannel2

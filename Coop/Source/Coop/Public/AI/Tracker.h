@@ -11,7 +11,7 @@ class UCoopHealthComponent;
 class USphereComponent;
 class USoundCue;
 
-UCLASS(Blueprintable)
+UCLASS( ClassGroup=(Coop), Blueprintable )
 class COOP_API ATracker : public APawn
 {
 	GENERATED_BODY()
@@ -53,6 +53,12 @@ protected:
 	/** Next point to move to. */
 	FVector NextPoint;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Swarm boost")
+	float FrequencyCheckNearTrackers;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Swarm boost")
+	float DistanceCheckNearTrackers;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Explosion")
 	float ExplosionDamage;
 
@@ -69,6 +75,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker")
 	float RequiredDistanceToTarget;
 
+	/** How many trackers are nearby, this will set the maximum power level.*/
+	UPROPERTY(Transient, Replicated, BlueprintReadOnly, Category = "Power")
+	int PowerLevel;
+
 	UPROPERTY(EditDefaultsOnly, Category= "Tracker")
 	uint8 bUseVelocityChange : 1;
 
@@ -81,6 +91,10 @@ protected:
 	/** If the tracker touches a coopcharacter, we want it to self damage until exploding, instead of exploding instantly. */
 	UPROPERTY()
 	FTimerHandle TimerSelfDamage;
+
+	/** Timer to check for nearby trackers. */
+	UPROPERTY()
+	FTimerHandle TimerNearbyTrackers;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -98,6 +112,9 @@ protected:
 
 	UFUNCTION()
 	void DamageSelf();
+
+	UFUNCTION()
+	void CheckNearTrackers();
 
 public:	
 	// Called every frame

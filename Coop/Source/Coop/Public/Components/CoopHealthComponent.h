@@ -16,7 +16,7 @@ UCLASS( ClassGroup=(Coop), meta=(BlueprintSpawnableComponent) )
 class COOP_API UCoopHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
-
+		
 public:	
 	// Sets default values for this component's properties
 	UCoopHealthComponent();

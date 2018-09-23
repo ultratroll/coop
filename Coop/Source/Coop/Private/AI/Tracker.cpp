@@ -9,7 +9,9 @@
 #include "DrawDebugHelpers.h"
 #include "CoopHealthComponent.h"
 #include "CoopCharacter.h"
+#include "Net/UnrealNetwork.h"
 #include "Components/SphereComponent.h"
+#include "CoopDefinitions.h"
 #include "Sound/SoundCue.h"
 
 /**
@@ -23,6 +25,8 @@ ATracker::ATracker()
 	PrimaryActorTick.bCanEverTick = true;
 
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
+	MeshComponent->SetCollisionObjectType(ECC_ENEMY);
+	//MeshComponent->SetCollisionResponseToChannel(ECC_ENEMY_TRACE, ECR_Block); // NOT SURE IF WE ARE GOING TO NEED AN ENEMY TRACE
 	RootComponent = MeshComponent;
 
 	MeshComponent->SetSimulatePhysics(true);
@@ -44,6 +48,11 @@ ATracker::ATracker()
 	ExplosionDamage = 40.0f;
 	ExplosionRadius= 200.0f;
 	SelfDamageFrequency = 0.5f;
+
+	FrequencyCheckNearTrackers = 0.7f;
+	DistanceCheckNearTrackers  = 300.0f;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -58,6 +67,8 @@ void ATracker::BeginPlay()
 		// Find initial point to move to.
 		NextPoint = GetNextPathPoint();
 	}
+
+	GetWorld()->GetTimerManager().SetTimer(TimerNearbyTrackers, this, &ATracker::CheckNearTrackers, FrequencyCheckNearTrackers, true, 1.0f);
 }
 
 const FVector ATracker::GetNextPathPoint()
@@ -66,6 +77,9 @@ const FVector ATracker::GetNextPathPoint()
 	ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
 
 	UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), Character);
+
+	if (IsValid(NavPath))
+		return FVector::ZeroVector;
 
 	// The first point in the path is always the current location, we want the second one to know where to push
 	if (NavPath->PathPoints.Num() > 1)
@@ -107,7 +121,7 @@ void ATracker::Explode()
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
 	MeshComponent->SetVisibility(false,true);
-	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	// Damage, radial force and destruction of the tracker should only happen on server. The visual effects above are okay in clients as well.
 	if (Role== ROLE_Authority)
@@ -115,7 +129,7 @@ void ATracker::Explode()
 		TArray<AActor*> IgnoreActors;
 		IgnoreActors.Add(this);
 
-		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController());
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), PowerLevel*ExplosionDamage, GetActorLocation(), ExplosionRadius+10.0f*PowerLevel, nullptr, IgnoreActors, this, GetInstigatorController());
 
 		if (bDebugTracker)
 			DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1);
@@ -127,6 +141,60 @@ void ATracker::Explode()
 void ATracker::DamageSelf()
 {
 	UGameplayStatics::ApplyDamage(this, 20.0f, GetInstigatorController(), this, nullptr);
+}
+
+void ATracker::CheckNearTrackers()
+{
+	// Hit results
+	TArray<FHitResult> OutHits;
+
+	// start and end locations
+	const FVector SweepStart = GetActorLocation();
+	const FVector SweepEnd = GetActorLocation();
+
+	// create a collision sphere
+	const FCollisionShape MyColSphere = FCollisionShape::MakeSphere(DistanceCheckNearTrackers);
+
+// 	if (bDebugTracker)
+// 	{
+// 		// draw collision sphere
+// 		DrawDebugSphere(GetWorld(), GetActorLocation(), MyColSphere.GetSphereRadius(), 50, FColor::Purple, true);
+// 	}
+
+	TArray<AActor*> NewNearEnemies = {};
+
+	FCollisionObjectQueryParams ObjectParams(ECC_ENEMY);
+
+	FCollisionQueryParams TraceParams(TEXT("TraceForTrackers"), true, this); // FCollisionQueryParams
+	TraceParams.bTraceComplex = true;
+	TraceParams.bTraceAsyncScene = true;
+	TraceParams.AddIgnoredActor(this);
+
+	bool isHit = GetWorld()->SweepMultiByObjectType(OutHits, SweepStart, SweepEnd, FQuat::Identity, ObjectParams, MyColSphere, TraceParams);
+
+	if (isHit)
+	{
+		for (auto& Hit : OutHits)
+		{
+			if (ATracker* Tracker = Cast<ATracker>(Hit.Actor.Get()))
+				NewNearEnemies.Add(Tracker);
+			//bool bIsThisTracker = Tracker ? true : false;
+			//NewNearEnemies.Add(Hit.Actor);
+
+// 			if (ATracker* Character = Cast<ATracker>(Hit.Actor))
+// 				;
+		}
+	}
+
+	PowerLevel = NewNearEnemies.Num();
+
+	if (!IsValid(MaterialInstance))
+	{
+		MaterialInstance = MeshComponent->CreateDynamicMaterialInstance(0, MeshComponent->GetMaterial(0));
+	}
+
+	if (IsValid(MaterialInstance))
+		MaterialInstance->SetScalarParameterValue("PowerLevelAlpha", PowerLevel);
 }
 
 // Called every frame
@@ -181,4 +249,11 @@ void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
 			bStartedSelfDestruct = true;
 		}
 	}
+}
+
+void ATracker::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ATracker, PowerLevel);
 }
