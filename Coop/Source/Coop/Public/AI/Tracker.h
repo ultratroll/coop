@@ -9,6 +9,7 @@
 class UStaticMeshComponent;
 class UCoopHealthComponent;
 class USphereComponent;
+class USoundCue;
 
 UCLASS(Blueprintable)
 class COOP_API ATracker : public APawn
@@ -24,6 +25,15 @@ public:
 	ATracker();
 
 protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category= "Audio")
+	USoundCue * SelfDestructSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	USoundCue * CharacterSpottedSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Audio")
+	USoundCue * ExplosionSound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	UParticleSystem* ExplosionEffect;
@@ -48,6 +58,10 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker|Explosion")
 	float ExplosionRadius;
+
+	/** Once character is detected, how frequently the tracker will self harm until exploding. */
+	UPROPERTY(EditDefaultsOnly, Category = "Tracker")
+	float SelfDamageFrequency;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tracker")
 	float MovementForce;

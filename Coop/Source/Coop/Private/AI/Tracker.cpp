@@ -10,6 +10,7 @@
 #include "CoopHealthComponent.h"
 #include "CoopCharacter.h"
 #include "Components/SphereComponent.h"
+#include "Sound/SoundCue.h"
 
 /**
  *	Simple Tracker.
@@ -42,6 +43,7 @@ ATracker::ATracker()
 
 	ExplosionDamage = 40.0f;
 	ExplosionRadius= 200.0f;
+	SelfDamageFrequency = 0.5f;
 }
 
 // Called when the game starts or when spawned
@@ -98,6 +100,9 @@ void ATracker::Explode()
 	if (ExplosionEffect)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ExplosionEffect, GetActorLocation());
 
+	if (ExplosionSound)
+		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
+
 	TArray<AActor*> IgnoreActors;
 	IgnoreActors.Add(this);
 
@@ -150,11 +155,14 @@ void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
 	if (bStartedSelfDestruct != 0)
 		return;
 
+	if (SelfDestructSound)
+		UGameplayStatics::SpawnSoundAttached(SelfDestructSound, RootComponent);
+
 	ACoopCharacter* CharacterPawn = Cast<ACoopCharacter>(OtherActor);
 
 	if (CharacterPawn)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerSelfDamage, this, &ATracker::DamageSelf, 0.5f, true, 0.0f);
+		GetWorld()->GetTimerManager().SetTimer(TimerSelfDamage, this, &ATracker::DamageSelf, SelfDamageFrequency, true, 0.0f);
 		bStartedSelfDestruct = true;
 	}
 }
