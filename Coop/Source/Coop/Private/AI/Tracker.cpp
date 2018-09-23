@@ -53,8 +53,11 @@ void ATracker::BeginPlay()
 
 	SetCanAffectNavigationGeneration(false);
 
-	// Find initial point to move to.
-	NextPoint = GetNextPathPoint();
+	if (Role == ROLE_Authority)
+	{
+		// Find initial point to move to.
+		NextPoint = GetNextPathPoint();
+	}
 }
 
 const FVector ATracker::GetNextPathPoint()
@@ -103,15 +106,22 @@ void ATracker::Explode()
 	if (ExplosionSound)
 		UGameplayStatics::PlaySoundAtLocation(this, ExplosionSound, GetActorLocation());
 
-	TArray<AActor*> IgnoreActors;
-	IgnoreActors.Add(this);
+	MeshComponent->SetVisibility(false,true);
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController());
+	// Damage, radial force and destruction of the tracker should only happen on server. The visual effects above are okay in clients as well.
+	if (Role== ROLE_Authority)
+	{
+		TArray<AActor*> IgnoreActors;
+		IgnoreActors.Add(this);
 
-	if (bDebugTracker)
-		DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1);
+		UGameplayStatics::ApplyRadialDamage(GetWorld(), ExplosionDamage, GetActorLocation(), ExplosionRadius, nullptr, IgnoreActors, this, GetInstigatorController());
 
-	Destroy();
+		if (bDebugTracker)
+			DrawDebugSphere(GetWorld(), GetActorLocation(), ExplosionRadius, 32, FColor::Red, false, 1);
+
+		SetLifeSpan(2.0f);
+	}
 }
 
 void ATracker::DamageSelf()
@@ -124,45 +134,51 @@ void ATracker::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	const float DistanceToTarget = (GetActorLocation() - NextPoint).Size();
-
-	NextPoint = GetNextPathPoint();
-
-	if (DistanceToTarget <= RequiredDistanceToTarget)
+	if (Role == ROLE_Authority && !bExploded)
 	{
-		if (bDebugTracker!=0)
-			DrawDebugString(GetWorld(), GetActorLocation(), "Target reached",(AActor*)0, FColor::Green, 0, false);
-	}
-	else
-	{
-		// Keep moving.
-		FVector ForceDirection = NextPoint - GetActorLocation();
-		ForceDirection.Normalize();
-		ForceDirection *= MovementForce;
 
-		MeshComponent->AddImpulse(ForceDirection, NAME_None, bUseVelocityChange);
+		const float DistanceToTarget = (GetActorLocation() - NextPoint).Size();
+
+		NextPoint = GetNextPathPoint();
+
+		if (DistanceToTarget <= RequiredDistanceToTarget)
+		{
+			if (bDebugTracker != 0)
+				DrawDebugString(GetWorld(), GetActorLocation(), "Target reached", (AActor*)0, FColor::Green, 0, false);
+		}
+		else
+		{
+			// Keep moving.
+			FVector ForceDirection = NextPoint - GetActorLocation();
+			ForceDirection.Normalize();
+			ForceDirection *= MovementForce;
+
+			MeshComponent->AddImpulse(ForceDirection, NAME_None, bUseVelocityChange);
+
+			if (bDebugTracker != 0)
+				DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32.0f, FColor::Blue, false, 0, 0, 1);
+		}
 
 		if (bDebugTracker != 0)
-			DrawDebugDirectionalArrow(GetWorld(), GetActorLocation(), GetActorLocation() + ForceDirection, 32.0f, FColor::Blue, false, 0, 0, 1);
+			DrawDebugSphere(GetWorld(), NextPoint, 5.0f, 12, FColor::Yellow, false, 0, 0, 1);
 	}
-
-	if (bDebugTracker != 0)
-		DrawDebugSphere(GetWorld(), NextPoint, 5.0f, 12, FColor::Yellow, false, 0, 0, 1);
 }
 
 void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
 {
-	if (bStartedSelfDestruct != 0)
+	if (bStartedSelfDestruct != 0 || bExploded)
 		return;
 
 	if (SelfDestructSound)
 		UGameplayStatics::SpawnSoundAttached(SelfDestructSound, RootComponent);
 
-	ACoopCharacter* CharacterPawn = Cast<ACoopCharacter>(OtherActor);
-
-	if (CharacterPawn)
+	if (Role == ROLE_Authority)
 	{
-		GetWorld()->GetTimerManager().SetTimer(TimerSelfDamage, this, &ATracker::DamageSelf, SelfDamageFrequency, true, 0.0f);
-		bStartedSelfDestruct = true;
+		ACoopCharacter* CharacterPawn = Cast<ACoopCharacter>(OtherActor);
+		if (CharacterPawn)
+		{
+			GetWorld()->GetTimerManager().SetTimer(TimerSelfDamage, this, &ATracker::DamageSelf, SelfDamageFrequency, true, 0.0f);
+			bStartedSelfDestruct = true;
+		}
 	}
 }

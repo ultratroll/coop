@@ -25,7 +25,7 @@ public:
 
 protected:
 
-	UPROPERTY(Replicated, Transient, BlueprintReadOnly, Category= "HealthComponent")
+	UPROPERTY(ReplicatedUsing= OnRep_HealthChanged, Transient, BlueprintReadOnly, Category= "HealthComponent")
 	float Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
@@ -33,6 +33,9 @@ protected:
 
 	UPROPERTY(BlueprintAssignable, Category= "Events")
 	FOnHealthChanged OnHealthChanged;
+
+	UFUNCTION()
+	void OnRep_HealthChanged(float OldHealth);
 
 	// Called when the game starts
 	virtual void BeginPlay() override;

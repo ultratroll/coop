@@ -11,6 +11,12 @@ UCoopHealthComponent::UCoopHealthComponent()
 	SetIsReplicated(true);
 }
 
+void UCoopHealthComponent::OnRep_HealthChanged(float OldHealth)
+{
+	float Damage = OldHealth - Health;
+
+	OnHealthChanged.Broadcast(this, Health, Damage, nullptr, nullptr, GetOwner());
+}
 
 // Called when the game starts
 void UCoopHealthComponent::BeginPlay()
