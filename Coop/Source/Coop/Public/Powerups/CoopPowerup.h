@@ -17,14 +17,25 @@ public:
 
 protected:
 
+	FTimerHandle TimerPowerupTick;
+
+	/** Time bettwen applications of the powerup effect. */
 	UPROPERTY(EditDefaultsOnly, Category= "Settings")
 	float PowerupInterval;
 
+	/** Total time we apply the powerup effect. */
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	int32 TotalNumberTicks;
 
+	UPROPERTY()
+	int32 TicksProcessed;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	void OnTickPowerup();
+
+	void ActivatePowerup();
 
 public:
 
@@ -33,4 +44,7 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
 	void OnExpired();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
+	void ApplyPowerup();
 };

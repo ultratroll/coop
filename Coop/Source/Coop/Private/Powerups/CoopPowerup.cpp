@@ -6,9 +6,8 @@
 // Sets default values
 ACoopPowerup::ACoopPowerup()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	PowerupInterval = 0;
+	TotalNumberTicks = 0;
 }
 
 // Called when the game starts or when spawned
@@ -16,5 +15,30 @@ void ACoopPowerup::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ACoopPowerup::OnTickPowerup()
+{
+	TicksProcessed++;
+
+	ApplyPowerup();
+
+	if (TicksProcessed >= TotalNumberTicks)
+	{
+		OnExpired();
+		GetWorldTimerManager().ClearTimer(TimerPowerupTick);
+	}
+}
+
+void ACoopPowerup::ActivatePowerup()
+{
+	if (PowerupInterval > 0)
+	{
+		GetWorldTimerManager().SetTimer(TimerPowerupTick, this, &ACoopPowerup::OnTickPowerup, PowerupInterval, true, 0.0f);
+	}
+	else
+	{
+		ApplyPowerup();
+	}
 }
 
