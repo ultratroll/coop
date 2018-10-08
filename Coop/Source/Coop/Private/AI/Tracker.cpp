@@ -78,7 +78,7 @@ const FVector ATracker::GetNextPathPoint()
 
 	UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), Character);
 
-	if (IsValid(NavPath))
+	if (!IsValid(NavPath))
 		return FVector::ZeroVector;
 
 	// The first point in the path is always the current location, we want the second one to know where to push
@@ -234,6 +234,8 @@ void ATracker::Tick(float DeltaTime)
 
 void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
 {
+	Super::NotifyActorBeginOverlap(OtherActor);
+
 	if (bStartedSelfDestruct != 0 || bExploded)
 		return;
 
