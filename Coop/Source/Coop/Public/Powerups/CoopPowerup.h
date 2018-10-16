@@ -6,6 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "CoopPowerup.generated.h"
 
+class ACoopCharacter;
+class USoundCue;
+class UParticleSystem;
+
 UCLASS()
 class COOP_API ACoopPowerup : public AActor
 {
@@ -17,34 +21,68 @@ public:
 
 protected:
 
-	FTimerHandle TimerPowerupTick;
-
-	/** Time bettwen applications of the powerup effect. */
-	UPROPERTY(EditDefaultsOnly, Category= "Settings")
-	float PowerupInterval;
+	/** The powerup effect has a single use?, otherwise it will be applied each PowerupInterval for TotalNumberTicks times. */
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	uint8 bIsSingleUse : 1;
 
 	/** Total time we apply the powerup effect. */
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	UPROPERTY(EditDefaultsOnly, Category = "Settings", meta = (EditCondition = "!bIsSingleUse"))
 	int32 TotalNumberTicks;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	int32 TicksProcessed;
 
-	// Called when the game starts or when spawned
+	/** Time bettwen applications of the powerup effect. */
+	UPROPERTY(EditDefaultsOnly, Category = "Settings", meta = (EditCondition = "!bIsSingleUse"))
+	float PowerupInterval;
+
+	/** Single use duration. */
+	UPROPERTY(EditDefaultsOnly, Category = "Settings", meta = (EditCondition = "bIsSingleUse"))
+	float SingleUseDuration;
+
+	UPROPERTY(Transient)
+	FTimerHandle TimerPowerupTick;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Components")
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(BlueprintReadOnly, Transient)
+	ACoopCharacter* UserInstigator;
+
+	/** Particle effect for whenever powerup is picked. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+	UParticleSystem* PickedParticleEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
+	USoundCue* PickedSound;
+
 	virtual void BeginPlay() override;
 
+	/** If the powerup is tick based, called on tick. */
 	void OnTickPowerup();
 
-	void ActivatePowerup();
+	/** Play sound and particle effects when picked. */
+	UFUNCTION()
+	void PlayPickedEffect();
 
 public:
 
-	UFUNCTION(BlueprintImplementableEvent, Category= "Powerup")
+	UFUNCTION(BlueprintCallable)
+	void SetInstigator(ACoopCharacter* NewInstigator)  { UserInstigator = NewInstigator; }
+
+	/** Activate the powerup. */
+	UFUNCTION(BlueprintCallable, Category= "Powerup")
+	void Activate(ACoopCharacter* NewInstigator);
+
+	/** Called only when the powerup starts to be applied, useful to catch for example starting values. */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
 	void OnActivated();
 
+	/** Called only when the powerup repeats an effect by tick, and those end. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
 	void OnExpired();
 
+	/** Here the powerup is actualy applied, its effect. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
 	void ApplyPowerup();
 };
