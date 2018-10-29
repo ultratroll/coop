@@ -5,6 +5,7 @@
 #include "Sound/SoundCue.h"
 #include "Kismet/GameplayStatics.h"
 #include "Particles/ParticleSystem.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ACoopPowerup::ACoopPowerup()
@@ -19,24 +20,22 @@ ACoopPowerup::ACoopPowerup()
 	SingleUseDuration = 5.0f;
 	TotalNumberTicks = 5;
 	PowerupInterval = 1.0f;
-}
 
-// Called when the game starts or when spawned
-void ACoopPowerup::BeginPlay()
-{
-	Super::BeginPlay();
+	SetReplicates(true);
 }
 
 void ACoopPowerup::OnTickPowerup()
 {
-	TicksProcessed++;
-
-	ApplyPowerup();
-
-	if (TicksProcessed >= TotalNumberTicks)
+	if (HasAuthority())
 	{
-		GetWorldTimerManager().ClearTimer(TimerPowerupTick);
-		OnExpired();
+		TicksProcessed++;
+
+		OnPowerupTicked();
+
+		if (TicksProcessed >= TotalNumberTicks)
+		{
+			OnFinishUse();
+		}
 	}
 }
 
@@ -50,28 +49,60 @@ void ACoopPowerup::PlayPickedEffect()
 		UGameplayStatics::SpawnSoundAttached(PickedSound, RootComponent);
 }
 
-void ACoopPowerup::Activate(ACoopCharacter* NewInstigator)
+void ACoopPowerup::OnRep_PowerUpActivated()
 {
-	SetInstigator(NewInstigator);
-
-	GetWorldTimerManager().ClearTimer(TimerPowerupTick);
-
-	PlayPickedEffect();
-
-	OnActivated();
-
-	MeshComponent->SetVisibility(false);
-
-	if (bIsSingleUse == 0)
+	if (bIsActivated)
 	{
-		TicksProcessed = 0;
-		GetWorldTimerManager().SetTimer(TimerPowerupTick, this, &ACoopPowerup::OnTickPowerup, PowerupInterval, true, 0.0f);
+		MeshComponent->SetVisibility(false);
+		PlayPickedEffect();
 	}
 	else
 	{
-		ApplyPowerup();
-
-		GetWorldTimerManager().SetTimer(TimerPowerupTick, this, &ACoopPowerup::OnExpired, SingleUseDuration);
+		;
 	}
+}
+
+void ACoopPowerup::OnFinishUse()
+{
+	OnExpired();
+
+	GetWorldTimerManager().ClearTimer(TimerPowerupTick);
+	OnExpired();
+	bIsActivated = false;
+	OnRep_PowerUpActivated();
+	Destroy();
+}
+
+void ACoopPowerup::Activate(ACoopCharacter* NewInstigator)
+{
+	if (HasAuthority())
+	{
+		SetInstigator(NewInstigator);
+
+		bIsActivated = true;
+		OnRep_PowerUpActivated();
+
+		GetWorldTimerManager().ClearTimer(TimerPowerupTick);
+
+		OnActivated();
+
+		if (bIsSingleUse == 0)
+		{
+			TicksProcessed = 0;
+			GetWorldTimerManager().SetTimer(TimerPowerupTick, this, &ACoopPowerup::OnTickPowerup, PowerupInterval, true, 0.0f);
+		}
+		else
+		{
+			GetWorldTimerManager().SetTimer(TimerPowerupTick, this, &ACoopPowerup::OnFinishUse, SingleUseDuration);
+		}
+	}
+}
+
+void ACoopPowerup::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ACoopPowerup, bIsActivated);
+	DOREPLIFETIME(ACoopPowerup, Instigator);
 }
 

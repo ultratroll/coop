@@ -21,6 +21,9 @@ public:
 
 protected:
 
+	UPROPERTY(ReplicatedUsing = OnRep_PowerUpActivated)
+	uint8 bIsActivated;
+
 	/** The powerup effect has a single use?, otherwise it will be applied each PowerupInterval for TotalNumberTicks times. */
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	uint8 bIsSingleUse : 1;
@@ -56,14 +59,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Settings")
 	USoundCue* PickedSound;
 
-	virtual void BeginPlay() override;
-
 	/** If the powerup is tick based, called on tick. */
 	void OnTickPowerup();
 
 	/** Play sound and particle effects when picked. */
 	UFUNCTION()
 	void PlayPickedEffect();
+
+	UFUNCTION()
+	void OnRep_PowerUpActivated();
+
+	/** Only used when finishing a powerup (tick ended or single use ended). Does the cleaning up. */
+	UFUNCTION()
+	void OnFinishUse();
 
 public:
 
@@ -84,5 +92,5 @@ public:
 
 	/** Here the powerup is actualy applied, its effect. */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Powerup")
-	void ApplyPowerup();
+	void OnPowerupTicked();
 };

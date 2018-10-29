@@ -19,6 +19,8 @@ ACoopPickup::ACoopPickup()
 	DecalComponent->SetupAttachment(RootComponent);
 
 	RespawnPowerupTime = 5.0f;
+
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -26,7 +28,8 @@ void ACoopPickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SpawnPowerup();
+	if (HasAuthority())
+		SpawnPowerup();
 }
 
 void ACoopPickup::SpawnPowerup()
@@ -41,7 +44,7 @@ void ACoopPickup::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if (PowerupInstance)
+	if (HasAuthority() && PowerupInstance)
 	{
 		ACoopCharacter* const Character = Cast<ACoopCharacter>(OtherActor);
 		PowerupInstance->Activate(Character);

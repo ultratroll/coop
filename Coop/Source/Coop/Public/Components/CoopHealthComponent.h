@@ -46,4 +46,7 @@ protected:
 
 public:	
 
+	UFUNCTION(BlueprintCallable, Category= "HealthComponent")
+	void Heal(float HealAmmount);
+
 };

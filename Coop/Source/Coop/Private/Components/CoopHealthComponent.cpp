@@ -42,6 +42,20 @@ void UCoopHealthComponent::OnDamage(AActor* DamagedActor, float Damage, const cl
 	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
 }
 
+void UCoopHealthComponent::Heal(float HealAmmount)
+{
+	// Not for reviving, only healing
+	if (HealAmmount <= 0 || Health <= 0)
+		return;
+
+	if (GetOwnerRole() == ROLE_Authority)
+	{
+		Health = FMath::Clamp(Health + HealAmmount, 0.0f, DefaultHealth);
+
+		OnHealthChanged.Broadcast(this, Health, HealAmmount, nullptr, nullptr, nullptr);
+	}
+}
+
 void UCoopHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
