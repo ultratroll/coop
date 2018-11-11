@@ -28,6 +28,10 @@ protected:
 
 	FTimerHandle TimerHandleStartWave;
 
+	/** Class of the bots. Notice that currently its centered here, but in the future we will want to have wave structures with multiple types of enemies. */
+ 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Horde")
+ 	TSubclassOf<APawn> BotClass;
+	
 protected:
 
 	/** Spawn new bot in blueprint. */
@@ -46,9 +50,15 @@ protected:
 	/** Set timer for next start wave. */
 	void PrepareForNextWave();
 
+	/** Used to check how the wave goes, if all enemies have died, then its time to end the wave */
+	void CheckForWaveState();
+
 public:
 
 	ACoopHordeGameMode();
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 	virtual void StartPlay() override;
 };

@@ -18,6 +18,7 @@ class COOP_API UCoopHealthComponent : public UActorComponent
 	GENERATED_BODY()
 		
 public:	
+	
 	// Sets default values for this component's properties
 	UCoopHealthComponent();
 
@@ -34,6 +35,8 @@ protected:
 	UPROPERTY(BlueprintAssignable, Category= "Events")
 	FOnHealthChanged OnHealthChanged;
 
+protected:
+
 	UFUNCTION()
 	void OnRep_HealthChanged(float OldHealth);
 
@@ -48,5 +51,11 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category= "HealthComponent")
 	void Heal(float HealAmmount);
+
+	UFUNCTION()
+	FORCEINLINE bool IsDead() const { return (Health <= 0); }
+
+	UFUNCTION()
+	FORCEINLINE float GetHealth() const { return Health; }
 
 };
