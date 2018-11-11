@@ -4,7 +4,7 @@
 #include "TimerManager.h"
 
 
-ACoopHordeGameMode::CoopHordeGameMode()
+ACoopHordeGameMode::ACoopHordeGameMode()
 {
 	TimeBettwenWaves = 10.0f;
 }

@@ -48,7 +48,7 @@ protected:
 
 public:
 
-	CoopHordeGameMode();
+	ACoopHordeGameMode();
 
 	virtual void StartPlay() override;
 };
