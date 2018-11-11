@@ -53,6 +53,10 @@ protected:
 	/** Used to check how the wave goes, if all enemies have died, then its time to end the wave */
 	void CheckForWaveState();
 
+	void CheckForAlivePlayers();
+
+	void GameOver();
+
 public:
 
 	ACoopHordeGameMode();

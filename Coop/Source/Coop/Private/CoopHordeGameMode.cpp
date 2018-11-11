@@ -21,6 +21,8 @@ void ACoopHordeGameMode::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	CheckForWaveState();
+
+	CheckForAlivePlayers();
 }
 
 void ACoopHordeGameMode::StartPlay()
@@ -126,4 +128,34 @@ void ACoopHordeGameMode::CheckForWaveState()
 	}
 
 	*/
+}
+
+void ACoopHordeGameMode::CheckForAlivePlayers()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+		if (PC && PC->GetPawn())
+		{
+			APawn* MyPawn = PC->GetPawn();
+			UCoopHealthComponent* HealthComponent = Cast<UCoopHealthComponent>(MyPawn->GetComponentByClass(UCoopHealthComponent::StaticClass()));
+
+			if (ensure(HealthComponent) && !HealthComponent->IsDead())
+			{
+				return;
+			}
+		}
+	}
+
+	// No one alive !
+	GameOver();
+
+}
+
+void ACoopHordeGameMode::GameOver()
+{
+	// If the game ended, lets end any on going wave
+	EndWave();
+
+	UE_LOG(LogTemp, Warning, TEXT("GAME OVER !"));
 }
