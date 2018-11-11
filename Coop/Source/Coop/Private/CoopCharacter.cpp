@@ -34,8 +34,6 @@ ACoopCharacter::ACoopCharacter()
 
 	TargetZoom = 65.0f;
 	ZoomInterpolationSpeed = 20.0f;
-
-	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
