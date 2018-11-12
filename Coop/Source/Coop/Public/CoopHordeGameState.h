@@ -37,10 +37,12 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent, Category= "Horde")
 	void OnWaveStateChanged(EHordeState OldHordeState, EHordeState NewHordeState);
 	
-public:
-
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing= OnRep_HordeState, Category= "Horde")
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_HordeState, Category = "Horde")
 	EHordeState HordeState;
 	
+public:
+
+	UFUNCTION()
+	void SetHordeState(EHordeState NewHordeState);
 
 };

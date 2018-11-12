@@ -15,3 +15,13 @@ void ACoopHordeGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 
 	DOREPLIFETIME(ACoopHordeGameState, HordeState);
 }
+
+void ACoopHordeGameState::SetHordeState(EHordeState NewHordeState)
+{
+	if (HasAuthority())
+	{
+		EHordeState const OldHordeState = HordeState;
+		HordeState = NewHordeState;
+		OnRep_HordeState(OldHordeState);
+	}
+}

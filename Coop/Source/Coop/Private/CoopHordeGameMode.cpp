@@ -48,7 +48,7 @@ void ACoopHordeGameMode::TrySpawnBot()
 
 void ACoopHordeGameMode::StartWave()
 {
-	UE_LOG(LogTemp, Warning, TEXT("STARTING WAVE"));
+	SetHordeState(EHordeState::WaveInProgress);
 
 	WaveCount++;
 
@@ -61,16 +61,14 @@ void ACoopHordeGameMode::StartWave()
 
 void ACoopHordeGameMode::EndWave()
 {
-	UE_LOG(LogTemp, Warning, TEXT("ENDING WAVE"));
+	SetHordeState(EHordeState::WaitingToComplete);
 
 	GetWorldTimerManager().ClearTimer(TimerHandleSpawnBots);
-
-	//PrepareForNextWave();
 }
 
 void ACoopHordeGameMode::PrepareForNextWave()
 {
-	UE_LOG(LogTemp, Warning, TEXT("NEXT WAVE IN %f"), TimeBettwenWaves);
+	SetHordeState(EHordeState::WaitingToStart);
 
 	GetWorldTimerManager().SetTimer(TimerHandleStartWave, this, &ACoopHordeGameMode::StartWave, TimeBettwenWaves, false);
 }
@@ -103,6 +101,7 @@ void ACoopHordeGameMode::CheckForWaveState()
 
 	if (!bIsAnyBotAlive)
 	{
+		SetHordeState(EHordeState::WaveComplete);
 		PrepareForNextWave();
 	}
 
@@ -160,7 +159,7 @@ void ACoopHordeGameMode::GameOver()
 	// If the game ended, lets end any on going wave
 	EndWave();
 
-	UE_LOG(LogTemp, Warning, TEXT("GAME OVER !"));
+	SetHordeState(EHordeState::GameOver);
 }
 
 void ACoopHordeGameMode::SetHordeState(EHordeState HordeState)
@@ -169,6 +168,6 @@ void ACoopHordeGameMode::SetHordeState(EHordeState HordeState)
 
 	if (ensureAlways(GS))
 	{
-		GS->HordeState = HordeState;
+		GS->SetHordeState(HordeState);
 	}
 }
