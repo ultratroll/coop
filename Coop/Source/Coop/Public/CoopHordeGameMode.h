@@ -6,6 +6,8 @@
 #include "GameFramework/GameModeBase.h"
 #include "CoopHordeGameMode.generated.h"
 
+enum class EHordeState : uint8;
+
 /**
  * 
  */
@@ -56,6 +58,8 @@ protected:
 	void CheckForAlivePlayers();
 
 	void GameOver();
+
+	void SetHordeState(EHordeState HordeState);
 
 public:
 

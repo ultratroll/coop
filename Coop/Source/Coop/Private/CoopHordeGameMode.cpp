@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CoopHordeGameMode.h"
+#include "Coop/Public/CoopHordeGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Coop/Public/Components/CoopHealthComponent.h"
@@ -9,6 +10,8 @@
 
 ACoopHordeGameMode::ACoopHordeGameMode()
 {
+	GameStateClass = ACoopHordeGameState::StaticClass();
+
 	TimeBettwenWaves = 10.0f;
 
 	PrimaryActorTick.bCanEverTick = true;
@@ -158,4 +161,14 @@ void ACoopHordeGameMode::GameOver()
 	EndWave();
 
 	UE_LOG(LogTemp, Warning, TEXT("GAME OVER !"));
+}
+
+void ACoopHordeGameMode::SetHordeState(EHordeState HordeState)
+{
+	ACoopHordeGameState* GS = GetGameState<ACoopHordeGameState>();
+
+	if (ensureAlways(GS))
+	{
+		GS->HordeState = HordeState;
+	}
 }
