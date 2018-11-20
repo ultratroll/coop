@@ -8,6 +8,8 @@
 
 enum class EHordeState : uint8;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilled,AActor*, Victim, AActor*, Killer); // Killed Actor and killer actor
+
 /**
  * 
  */
@@ -69,4 +71,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void StartPlay() override;
+
+	UPROPERTY(BlueprintAssignable, Category= "GameMode")
+	FOnActorKilled OnActorKilled;
 };

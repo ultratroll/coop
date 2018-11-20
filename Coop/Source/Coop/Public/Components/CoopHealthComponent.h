@@ -26,6 +26,9 @@ public:
 
 protected:
 
+	UPROPERTY()
+	uint8 bIsDead : 1;
+
 	UPROPERTY(ReplicatedUsing= OnRep_HealthChanged, Transient, BlueprintReadOnly, Category= "HealthComponent")
 	float Health;
 

@@ -2,14 +2,15 @@
 
 #include "CoopHordeGameMode.h"
 #include "Coop/Public/CoopHordeGameState.h"
+#include "Coop/Public/CoopPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 #include "Coop/Public/Components/CoopHealthComponent.h"
 #include "TimerManager.h"
 
-
 ACoopHordeGameMode::ACoopHordeGameMode()
 {
+	PlayerStateClass = ACoopPlayerState::StaticClass();
 	GameStateClass = ACoopHordeGameState::StaticClass();
 
 	TimeBettwenWaves = 10.0f;

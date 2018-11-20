@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CoopHealthComponent.h"
+#include "CoopHordeGameMode.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
@@ -34,12 +35,25 @@ void UCoopHealthComponent::BeginPlay()
 
 void UCoopHealthComponent::OnDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage < 0)
+	if (Damage < 0 || bIsDead)
 		return;
 
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
 	OnHealthChanged.Broadcast(this, Health, Damage, DamageType, InstigatedBy, DamageCauser);
+
+	ACoopHordeGameMode* GM = Cast<ACoopHordeGameMode>(GetWorld()->GetAuthGameMode());
+
+	bIsDead = Health <= 0;
+
+	if (Health <= 0)
+	{
+		bIsDead = true;
+		if (GM)
+		{
+			GM->OnActorKilled.Broadcast(DamagedActor, DamageCauser);
+		}
+	}
 }
 
 void UCoopHealthComponent::Heal(float HealAmmount)
