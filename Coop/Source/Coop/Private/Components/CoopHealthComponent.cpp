@@ -51,7 +51,7 @@ void UCoopHealthComponent::OnDamage(AActor* DamagedActor, float Damage, const cl
 		bIsDead = true;
 		if (GM)
 		{
-			GM->OnActorKilled.Broadcast(DamagedActor, DamageCauser);
+			GM->OnActorKilled.Broadcast(DamagedActor, DamageCauser, InstigatedBy);
 		}
 	}
 }

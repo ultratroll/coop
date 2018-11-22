@@ -8,7 +8,7 @@
 
 enum class EHordeState : uint8;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActorKilled,AActor*, Victim, AActor*, Killer); // Killed Actor and killer actor
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnActorKilled,AActor*, Victim, AActor*, Killer, AController*, KillerController); // Killed Actor and killer actor
 
 /**
  * 
