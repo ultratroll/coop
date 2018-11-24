@@ -63,6 +63,9 @@ protected:
 
 	void SetHordeState(EHordeState HordeState);
 
+	/** Checks if there are any player controllers without pawn and then restarts the player. */
+	void RestartPlayers();
+
 public:
 
 	ACoopHordeGameMode();

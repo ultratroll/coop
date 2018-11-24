@@ -72,6 +72,9 @@ void ACoopHordeGameMode::PrepareForNextWave()
 	SetHordeState(EHordeState::WaitingToStart);
 
 	GetWorldTimerManager().SetTimer(TimerHandleStartWave, this, &ACoopHordeGameMode::StartWave, TimeBettwenWaves, false);
+
+	// Lets resapwn any death players.
+	RestartPlayers();
 }
 
 void ACoopHordeGameMode::CheckForWaveState()
@@ -170,5 +173,17 @@ void ACoopHordeGameMode::SetHordeState(EHordeState HordeState)
 	if (ensureAlways(GS))
 	{
 		GS->SetHordeState(HordeState);
+	}
+}
+
+void ACoopHordeGameMode::RestartPlayers()
+{
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* PC = It->Get();
+		if (PC && PC->GetPawn() == nullptr)
+		{
+			RestartPlayer(PC);
+		}
 	}
 }
