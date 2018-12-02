@@ -69,14 +69,17 @@ protected:
 
 	void EndZoom();
 
-	void OnFireBegin();
-
-	void OnFireEnd();
-
 	UFUNCTION()
 	void OnHealthChanged(UCoopHealthComponent* MyHealthComponent, float Health, float HealthDelta, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
 
 public:	
+
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void OnFireBegin();
+
+	UFUNCTION(BlueprintCallable, Category = "Player")
+	void OnFireEnd();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
