@@ -7,7 +7,9 @@
 // Sets default values for this component's properties
 UCoopHealthComponent::UCoopHealthComponent()
 {
-	DefaultHealth= 100.0f;
+	DefaultHealth = 100.0f;
+
+	TeamNumber = 255;
 
 	SetIsReplicated(true);
 }
@@ -37,6 +39,13 @@ void UCoopHealthComponent::OnDamage(AActor* DamagedActor, float Damage, const cl
 {
 	if (Damage < 0 || bIsDead)
 		return;
+
+	if (DamagedActor != DamageCauser && IsFriendly(DamagedActor, DamageCauser))
+		return;
+
+	// Friendly fire.
+// 	if (DamageCauser->GetComponentByClass(UCoopHealthComponent::StaticClass) && TeamNumber == && !bCanSuicide)
+// 		return;
 
 	Health = FMath::Clamp(Health - Damage, 0.0f, DefaultHealth);
 
@@ -68,6 +77,21 @@ void UCoopHealthComponent::Heal(float HealAmmount)
 
 		OnHealthChanged.Broadcast(this, Health, HealAmmount, nullptr, nullptr, nullptr);
 	}
+}
+
+bool UCoopHealthComponent::IsFriendly(AActor* ActorA, AActor* ActorB)
+{
+	// By default lets assume that both sides are friendly.
+	if (ActorA == nullptr || ActorB == nullptr)
+		return true;
+
+	UCoopHealthComponent* HealthA = Cast<UCoopHealthComponent>(ActorA->GetComponentByClass(UCoopHealthComponent::StaticClass()));
+	UCoopHealthComponent* HealthB = Cast<UCoopHealthComponent>(ActorB->GetComponentByClass(UCoopHealthComponent::StaticClass()));
+
+	if (HealthA == nullptr || HealthB == nullptr)
+		return true;
+
+	return HealthA->TeamNumber == HealthB->TeamNumber;
 }
 
 void UCoopHealthComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

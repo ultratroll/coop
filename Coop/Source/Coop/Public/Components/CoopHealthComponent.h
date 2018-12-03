@@ -19,6 +19,10 @@ class COOP_API UCoopHealthComponent : public UActorComponent
 		
 public:	
 	
+	/** Team number. */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "HealthComponent")
+	uint8 TeamNumber;
+
 	// Sets default values for this component's properties
 	UCoopHealthComponent();
 
@@ -60,5 +64,8 @@ public:
 
 	UFUNCTION()
 	FORCEINLINE float GetHealth() const { return Health; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "HealthComponent")
+	static bool IsFriendly(AActor* ActorA, AActor* ActorB);
 
 };

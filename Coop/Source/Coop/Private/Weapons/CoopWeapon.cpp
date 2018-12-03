@@ -128,7 +128,7 @@ void ACoopWeapon::Fire()
 				ActualDamage *= HeadshotDamageMultiplier;
 			}
 
-			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, PawnOwner->GetInstigatorController(), this, CoopWeaponDamage);
+			UGameplayStatics::ApplyPointDamage(HitActor, ActualDamage, ShotDirection, Hit, PawnOwner->GetInstigatorController(), PawnOwner, CoopWeaponDamage);
 			
 			if (ImpactEffect)
 				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), ImpactEffect, Hit.ImpactPoint, Hit.ImpactNormal.Rotation());
