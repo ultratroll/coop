@@ -42,6 +42,9 @@ ACoopWeapon::ACoopWeapon()
 	NetUpdateFrequency = 70.0f;
 	MinNetUpdateFrequency = 33.0f;
 
+	// By default of weapon has perfect accuracy.
+	BulletSpread = 2.0;
+
 	SetReplicates(true);
 }
 
@@ -89,6 +92,11 @@ void ACoopWeapon::Fire()
 		PawnOwner->GetActorEyesViewPoint(EyeLocation, EyeRotation);
 		
 		FVector ShotDirection = EyeRotation.Vector();
+
+		float HalfRad = FMath::DegreesToRadians(BulletSpread);
+		
+		ShotDirection = FMath::VRandCone(ShotDirection, HalfRad, HalfRad);
+
 		FVector TraceEnd = EyeLocation + (ShotDirection * 1000.0f);
 		FHitResult Hit;
 		

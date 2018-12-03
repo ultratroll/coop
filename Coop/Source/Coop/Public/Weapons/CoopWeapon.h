@@ -75,6 +75,10 @@ protected:
 
 	FTimerHandle FireTimer;
 
+	/** The spread angle to be used at random, serves to alter the accuracy of our weapon. */
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon", meta = (ClampMin=0.0f))
+	float BulletSpread;
+
 	/** Last time weapon was fired. */
 	float LastFireTime;
 
