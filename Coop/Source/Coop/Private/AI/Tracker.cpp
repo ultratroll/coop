@@ -45,8 +45,8 @@ ATracker::ATracker()
 	RequiredDistanceToTarget = 100.0f;
 	bUseVelocityChange = false;
 
-	ExplosionDamage = 40.0f;
-	ExplosionRadius= 200.0f;
+	ExplosionDamage = 60.0f;
+	ExplosionRadius= 350.0f;
 	SelfDamageFrequency = 0.5f;
 
 	FrequencyCheckNearTrackers = 0.7f;
@@ -73,18 +73,46 @@ void ATracker::BeginPlay()
 
 const FVector ATracker::GetNextPathPoint()
 {
+	AActor* BestTarget;
+	float LowerTargetDistance = 1000000;
+
 	// Hack to get player location
 	ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
 
-	UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), Character);
-
-	if (!IsValid(NavPath))
-		return FVector::ZeroVector;
-
-	// The first point in the path is always the current location, we want the second one to know where to push
-	if (NavPath->PathPoints.Num() > 1)
+	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 	{
-		return NavPath->PathPoints[1];
+		APawn* TestPawn = It->Get();
+		if (TestPawn == nullptr || UCoopHealthComponent::IsFriendly(TestPawn, this) || TestPawn->IsPlayerControlled())
+		{
+			continue;
+		}
+
+		UCoopHealthComponent* TestPawnHealthComp = Cast<UCoopHealthComponent>(TestPawn->GetComponentByClass(UCoopHealthComponent::StaticClass()));
+
+		if (TestPawnHealthComp && !TestPawnHealthComp->IsDead())
+		{
+			float const Distance = (GetActorLocation() - TestPawn->GetActorLocation()).Size();
+				
+			if (Distance < LowerTargetDistance)
+			{
+				LowerTargetDistance = Distance;
+				BestTarget = TestPawn;
+			}
+		}
+	}
+
+	if (BestTarget)
+	{
+		UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), BestTarget);
+
+		if (!IsValid(NavPath))
+			return FVector::ZeroVector;
+
+		// The first point in the path is always the current location, we want the second one to know where to push
+		if (NavPath->PathPoints.Num() > 1)
+		{
+			return NavPath->PathPoints[1];
+		}
 	}
 
 	return GetActorLocation();
@@ -236,7 +264,7 @@ void ATracker::NotifyActorBeginOverlap(AActor* OtherActor)
 {
 	Super::NotifyActorBeginOverlap(OtherActor);
 
-	if (bStartedSelfDestruct != 0 || bExploded)
+	if (bStartedSelfDestruct != 0 || bExploded || UCoopHealthComponent::IsFriendly(this, OtherActor))
 		return;
 
 	if (SelfDestructSound)
