@@ -73,16 +73,16 @@ void ATracker::BeginPlay()
 
 const FVector ATracker::GetNextPathPoint()
 {
-	AActor* BestTarget;
+	AActor* BestTarget = nullptr;
 	float LowerTargetDistance = 1000000;
 
 	// Hack to get player location
-	ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
+	//ACharacter* Character= UGameplayStatics::GetPlayerCharacter(this, 0);
 
 	for (FConstPawnIterator It = GetWorld()->GetPawnIterator(); It; ++It)
 	{
 		APawn* TestPawn = It->Get();
-		if (TestPawn == nullptr || UCoopHealthComponent::IsFriendly(TestPawn, this) || TestPawn->IsPlayerControlled())
+		if (TestPawn == nullptr || UCoopHealthComponent::IsFriendly(TestPawn, this))
 		{
 			continue;
 		}
@@ -101,9 +101,11 @@ const FVector ATracker::GetNextPathPoint()
 		}
 	}
 
-	if (BestTarget)
+	if (IsValid(BestTarget))
 	{
 		UNavigationPath* NavPath = UNavigationSystem::FindPathToActorSynchronously(this, GetActorLocation(), BestTarget);
+
+		GetWorldTimerManager().SetTimer(TimerRefreshPath, this, &ATracker::RefreshPath, 5.0f, false);
 
 		if (!IsValid(NavPath))
 			return FVector::ZeroVector;
@@ -223,6 +225,11 @@ void ATracker::CheckNearTrackers()
 
 	if (IsValid(MaterialInstance))
 		MaterialInstance->SetScalarParameterValue("PowerLevelAlpha", PowerLevel);
+}
+
+void ATracker::RefreshPath()
+{
+	NextPoint = GetNextPathPoint();
 }
 
 // Called every frame

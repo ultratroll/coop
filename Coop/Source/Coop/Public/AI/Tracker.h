@@ -88,6 +88,10 @@ protected:
 	UPROPERTY(Transient)
 	uint8 bStartedSelfDestruct : 1;
 
+	/** */
+	UPROPERTY()
+	FTimerHandle TimerRefreshPath;
+
 	/** If the tracker touches a coopcharacter, we want it to self damage until exploding, instead of exploding instantly. */
 	UPROPERTY()
 	FTimerHandle TimerSelfDamage;
@@ -115,6 +119,9 @@ protected:
 
 	UFUNCTION()
 	void CheckNearTrackers();
+
+	UFUNCTION()
+	void RefreshPath();
 
 public:	
 	// Called every frame
