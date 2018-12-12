@@ -12,5 +12,15 @@
 				"Engine"
 			]
 		}
+	],
+	"Plugins": [
+		{
+			"Name": "RawInput",
+			"Enabled": true
+		},
+		{
+			"Name": "SteamController",
+			"Enabled": true
+		}
 	]
 }
