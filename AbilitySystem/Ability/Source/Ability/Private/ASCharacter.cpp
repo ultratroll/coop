@@ -1,10 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ASCharacter.h"
+#include "AbilitySystemComponent.h"
+#include "Abilities/GameplayAbility.h"
+
+UAbilitySystemComponent* AASCharacter::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComp;
+}
 
 // Sets default values
 AASCharacter::AASCharacter()
 {
+	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilityComponent"));
+
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -29,5 +38,21 @@ void AASCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void AASCharacter::AcquireAbility(TSubclassOf<UGameplayAbility> AbilityToAcquire)
+{
+	if (AbilitySystemComp)
+	{
+		if (HasAuthority() && AbilityToAcquire)
+		{
+			//FGameplayAbilitySpecDef SpecDef = FGameplayAbilitySpecDef();
+			//SpecDef.Ability = AbilityToAcquire;
+			//FGameplayAbilitySpec AbilitySpec = FGameplayAbilitySpec(SpecDef, 1);
+			//AbilitySystemComp->GiveAbility(AbilitySpec);
+			AbilitySystemComp->GiveAbility(FGameplayAbilitySpec(AbilityToAcquire));
+		}
+		AbilitySystemComp->InitAbilityActorInfo(this, this);
+	}
 }
 
