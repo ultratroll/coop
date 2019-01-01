@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ASCharacter.h"
+#include "ASAttributeSetBase.h"
 #include "AbilitySystemComponent.h"
 #include "Abilities/GameplayAbility.h"
 
@@ -13,6 +14,8 @@ UAbilitySystemComponent* AASCharacter::GetAbilitySystemComponent() const
 AASCharacter::AASCharacter()
 {
 	AbilitySystemComp = CreateDefaultSubobject<UAbilitySystemComponent>(TEXT("AbilityComponent"));
+
+	AtributeSet = CreateDefaultSubobject<UASAttributeSetBase>(TEXT("AttributeSetComponent"));
 
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;

@@ -9,6 +9,7 @@
 
 class UGameplayAbility;
 class UAbilitySystemComponent;
+class UASAttributeSetBase;
 
 UCLASS()
 class ABILITY_API AASCharacter : public ACharacter, public IAbilitySystemInterface
@@ -26,6 +27,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AbilityCharacter", meta = (AllowPrivateAccess = "true"))
 	UAbilitySystemComponent* AbilitySystemComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AbilityCharacter", meta = (AllowPrivateAccess = "true"))
+	UASAttributeSetBase* AtributeSet;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
